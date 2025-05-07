@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQL Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="leftbar">
+        <h1>AQL Manager</h1>
+        <p id="version"><button id="clear_storage" title="Clear Local Storage">🗑️</button>Version 0.1</p>
+        <label id="file_label" for="aqlstore">Local AQL storage file:</label>
+        <input type="file" id="aqlstore" name="aqlstore" accept=".json" />
+        <div id="listcontainer">
+            <ul id="aql_list">
+                <!--
+                <span class="copyright">
+                &copy CatSalut. Servei Català de la Salut
+                <br>
+                Licensed under <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache 2.0</a>.
+                <br>                Author: <a href="mailto:martinandreaskoch@catsalut.cat" target="_blank">Martin A. Koch, PhD</a>.
+                </span>
+                <br>
+                <br>
+                Please select a local AQL storage file (JSON) or add an AQL to begin... -->
+            </ul>
+        </div>
+        <div id="leftbuttonmenu">
+            <button id ="add_aql">➕ Add AQL</button><br>
+            <button id="save_aql">💾 Save AQL collection</button><br>
+            <button id="delete_aql" >❌ Delete AQL</button>
+        </div>
+    </div>
+
+  
+    
+    <div id="main">
+
+        <div>
+            <label><strong>Title:</strong></label><br>
+            <input type="text" id="title" name="title" required maxlength="32"
+                size="10" />          
+        </div>
+        <div>
+            <label><strong>Description:</strong></label>
+            <textarea id="descriptionBox" oninput="" onkeydown="handleTab(event)" placeholder="Type your description here..."></textarea>
+        </div>
+        <div>
+            <label><strong>AQL Input:</strong>  </label><button class="topbutton" onclick="autoFormat()" title="Auto-Format">🤖</button>
+            <textarea id="inputBox" oninput="updateText()" onkeydown="handleTab(event)" placeholder="Type your AQL query here..."></textarea>
+        </div>
+        <div>
+            <label><strong>Formatted AQL:</strong></label>  <button class="topbutton" onclick="downloadHighlightAsImage()" title="Save as image">📸</button>
+            <div id="highlightBox" class="highlighted"></div>
+        </div>
+        <div>
+            <label><strong>Clean AQL:</strong></label>  <button class="topbutton" onclick="copyOutput()" title="Copy to clipboard">📋</button>
+            <div id="outputBox2" class="outputBox2"></div>
+        </div>
+        <span class="copyright">
+            <br>       
+            <br>       
+            &copy 2025 CatSalut. Servei Català de la Salut.
+            Licensed under <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache 2.0</a>.
+           Author: <a href="mailto:martinandreaskoch@catsalut.cat" target="_blank">Martin A. Koch, PhD</a>.
+            </span>
+    </div>
+
+   
+
+
+    <script src="index.js"></script>
+</body>
+</html>

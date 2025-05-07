@@ -1,0 +1,240 @@
+html{
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #ECF9FF;
+}
+
+body {
+    font-size: 16px;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+h1{
+  font-size: 22pt;
+  font-style: oblique;
+  margin:0pt;
+  padding:0pt;
+
+  background:linear-gradient(
+    to right,
+    rgb(142, 199, 229) 0%,
+    rgb(255,255,255) 10%,
+    rgb(142, 199, 229)20%);
+    background-position: 0;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: move 4s infinite linear;
+    animation-fill-mode: forwards;
+}
+
+@keyframes move{
+  0%{background-position: -50px;}
+  50%{background-position: 180px;}
+  100%{background-position: 200px;}
+}
+
+
+label{
+  color:black;
+}
+
+#version{
+    font-size: 10pt;
+    color: lightgray;
+}
+
+#listcontainer {
+    height: 60vh;
+    overflow: auto;
+    margin-top: 10px;
+    border-radius: 5px;
+    background-color: white;
+}
+
+#aqlstore{
+  color:white;
+}
+
+.copyright{
+  color:black;
+  font-style: italic;
+  font-weight: normal;
+}
+
+#file_label{
+  color: white;
+}
+
+
+input[type="file"]::file-selector-button {
+  margin-top: 5px;
+  height: 35px;
+  padding: 0.2em 0.4em;
+  border-radius: 5px;
+  background-color: #F5F5F5;
+  cursor:pointer;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background-color: #BDE0F2;
+  transition: 0.2s;
+}
+
+
+ul{
+    list-style: none;
+    padding: 5px;
+    background-color: white;
+    color: #A20707;
+    font-weight: bold;
+    
+}
+
+#leftbar {
+    width: 250px;
+    background-color: #00375F;
+    padding: 10px;
+    
+    position: sticky;
+    top: 0;
+    height: 96vh;
+    overflow:hidden;
+    box-shadow: 3px 0px 5px #888888;
+}
+
+li {
+    cursor: pointer;
+    text-decoration: none;
+    color: #333;
+    display: block;
+    word-wrap: break-word;
+    padding: 5px;
+    background-color: white;
+    
+}
+
+li:hover {
+    background-color: #A20707;
+    font-weight: bold;
+    color:white;
+}
+
+#aql_list li.selected {
+    background-color: white;
+    font-weight: bold;
+    color: #A20707;
+    cursor: pointer;
+}
+
+#main {
+    height: 95vh;
+    width:100px;
+    flex-grow: 1;
+    padding: 20px;
+    overflow: auto;
+}
+
+#title{
+    width: 400px;
+    height: 30px;
+    border-radius: 5pt;
+    font-weight: bold;
+    font-size: 11pt;
+    padding-left: 5pt;
+    border: 1px solid #ccc;
+}
+
+textarea, .highlighted, .outputBox2 {
+    width: 100%;
+    min-height: 200px;
+    font-family: monospace;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-sizing: border-box;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    overflow: auto;
+    border-radius: 5pt;
+  	margin-bottom:10px;
+  }
+
+  .highlighted {
+    background-color: #f9f9f9;
+    color: #333;
+    min-height: 30px;
+    border-radius: 0pt;
+  }
+
+  .outputBox2 {
+    background-color: #f9f9f9;
+    color: #333;
+    min-height: 30px;
+  }
+
+
+
+  #descriptionBox{
+    min-height: 80px;
+  }
+
+#outputBox {
+    /*display: none;*/
+    box-sizing: border-box;
+    white-space: pre-wrap;
+    font-size: 10pt;
+    overflow-wrap: break-word;
+    
+    min-height: 0pt;
+  }
+
+  .keyword {
+    color: blue;
+    font-weight: bold;
+  }
+  .datatype_keyword {
+    color: red;
+    font-weight: bold;
+  }
+  .green_keyword {
+    color: green;
+    font-weight: bold;
+  }
+  .parameter_keyword {
+    color: orange;
+    font-weight: bold;
+  }
+
+  .comment {
+    color:gray;
+    font-style: italic;
+  }
+
+  button {
+    padding: 10px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    width: 250px;
+    border-radius: 5pt;
+    background-color: #F5F5F5;
+  }
+
+  .topbutton,   #clear_storage{
+    padding: 1pt;
+    width: auto;
+    align-self: right;
+    font-size: 10pt;
+	height:25px;
+	width:25px;
+  }
+
+
+
+  #leftbuttonmenu{
+    position: absolute;
+    bottom: 0;
+  }
