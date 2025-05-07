@@ -165,6 +165,8 @@ function clearFields() {
     document.getElementById('title').value = '';
     document.getElementById('descriptionBox').value = '';
     document.getElementById('inputBox').value = '';
+    document.getElementById('highlightBox').innerHTML = '';
+    document.getElementById('outputBox2').innerHTML = '';
 }
 
 function triggerDownload() {
@@ -353,6 +355,10 @@ document.getElementById('clear_storage').onclick = function () {
         document.getElementById('title').value = '';
         document.getElementById('descriptionBox').value = '';
         document.getElementById('inputBox').value = '';
+        document.getElementById('aqlstore').value = '';
+        document.getElementById('highlightBox').innerHTML = '';
+        document.getElementById('outputBox2').innerHTML = '';
+
         alert("Local storage has been cleared.");
         updateText();
     }
