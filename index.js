@@ -3,14 +3,22 @@ let selectedIndex = -1;
 let selectedListItem = null;
 
 const inputBox = document.getElementById('inputBox');
-  const outputBox2 = document.getElementById('outputBox2');
-  const highlightBox = document.getElementById('highlightBox');
-
+const outputBox2 = document.getElementById('outputBox2');
+const highlightBox = document.getElementById('highlightBox');
 
 const keywords = ['SELECT',  'FROM', 'CONTAINS', 'WHERE', 'ORDER BY', 'LIMIT', 'OFFSET', 'NOT', 'LIKE', 'matches', 'exists', '<', '>', '=', '!', 'true', 'false', 'NULL'];
 const datatype_keywords = ['VERSION','EHR', 'CONTENT_ITEM', 'ENTRY', 'CARE_ENTRY', 'EVENT', 'ITEM_STRUCTURE', 'ITEM', 'COMPOSITION', 'FOLDER', 'EHR_STATUS', 'EVENT_CONTEXT', 'SECTION', 'GENERIC_ENTRY', 'ADMIN_ENTRY', 'OBSERVATION', 'INSTRUCTION', 'ACTION', 'EVALUATION', 'ACTIVITY', 'HISTORY', 'POINT_EVENT', 'INTERVAL_EVENT', 'FEEDER_AUDIT', 'ITEM_LIST', 'ITEM_SINGLE', 'ITEM_TABLE', 'ITEM_TREE', 'CLUSTER', 'ELEMENT'];
 const green_keywords = ['DESC','ASC','AS','DISTINCT', 'AND', 'OR']
 let fileurl;
+
+toggleInputDisabled(true);
+
+function toggleInputDisabled(state){
+    document.getElementById('title').disabled = state;
+    document.getElementById('descriptionBox').disabled = state;
+    document.getElementById('inputBox').disabled = state;
+}
+
 
 document.getElementById('aqlstore').addEventListener('change', function (e) {
     
@@ -62,6 +70,7 @@ function populateAQLList() {
             if (selectedListItem) selectedListItem.classList.remove('selected');
             li.classList.add('selected');
             selectedListItem = li;
+            toggleInputDisabled(false);
         };
 
         list.appendChild(li);
@@ -156,8 +165,10 @@ document.getElementById('delete_aql').onclick = function () {
     if (selectedIndex < 0) return;
     aqlData.splice(selectedIndex, 1);
     selectedIndex = -1;
+    selectedListItem = null;
     populateAQLList();
     clearFields();
+    toggleInputDisabled(true);
     //triggerDownload();
 };
 
@@ -329,6 +340,16 @@ function debounce(func, delay) {
 }
 
 const autoSaveToLocalStorage = debounce(() => {
+    /*if (selectedListItem == null){
+        document.getElementById('title').disabled = true;
+        document.getElementById('descriptionBox').disabled = true;
+        document.getElementById('inputBox').disabled = true;
+    }else{
+        document.getElementById('title').disabled = false;
+        document.getElementById('descriptionBox').disabled = false;
+        document.getElementById('inputBox').disabled = false;
+    }*/
+    
     // Save the currently active AQL entry before serializing
     if (selectedIndex >= 0) {
         aqlData[selectedIndex] = {
@@ -345,6 +366,7 @@ document.addEventListener('keydown', autoSaveToLocalStorage);
 document.addEventListener('click', autoSaveToLocalStorage);
 
 
+
 document.getElementById('clear_storage').onclick = function () {
     if (confirm("Are you sure you want to clear all saved AQL data? This cannot be undone.")) {
         localStorage.removeItem('aqlData');
@@ -352,14 +374,16 @@ document.getElementById('clear_storage').onclick = function () {
         selectedIndex = -1;
         selectedListItem = null;
         document.getElementById('aql_list').innerHTML = "";
-        document.getElementById('title').value = '';
+        clearFields();
+        /*document.getElementById('title').value = '';
         document.getElementById('descriptionBox').value = '';
         document.getElementById('inputBox').value = '';
         document.getElementById('aqlstore').value = '';
         document.getElementById('highlightBox').innerHTML = '';
-        document.getElementById('outputBox2').innerHTML = '';
+        document.getElementById('outputBox2').innerHTML = '';*/
 
         alert("Local storage has been cleared.");
         updateText();
+        toggleInputDisabled(true);
     }
 };
