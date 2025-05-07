@@ -45,12 +45,21 @@ label{
     color: lightgray;
 }
 
+
 #listcontainer {
-    height: 60vh;
-    overflow: auto;
-    margin-top: 10px;
-    border-radius: 5px;
-    background-color: white;
+ 
+  flex: 1 1 auto; /* grow to fill space */
+  overflow: auto;
+  margin-top: 10px;
+  border-radius: 5px;
+   background-color: white;
+}
+
+#leftbuttonmenu{
+  /*position: absolute;*/
+  flex-shrink: 0;
+  margin-top: 10px;;
+
 }
 
 #aqlstore{
@@ -93,16 +102,21 @@ ul{
 }
 
 #leftbar {
+    display: flex;
+    flex-direction: column;
     width: 250px;
     background-color: #00375F;
     padding: 10px;
     
     position: sticky;
-    top: 0;
-    height: 96vh;
+    top: 0px;
+    height: 100vh;
     overflow:hidden;
     box-shadow: 3px 0px 5px #888888;
+    box-sizing: border-box;
 }
+
+
 
 li {
     cursor: pointer;
@@ -218,7 +232,7 @@ textarea, .highlighted, .outputBox2 {
     cursor: pointer;
     margin-right: 10px;
     margin-bottom: 5px;
-    width: 250px;
+    width: 230px;
     border-radius: 5pt;
     background-color: #F5F5F5;
   }
@@ -234,7 +248,9 @@ textarea, .highlighted, .outputBox2 {
 
 
 
-  #leftbuttonmenu{
-    position: absolute;
-    bottom: 0;
-  }
+
+
+
+
+
+  
