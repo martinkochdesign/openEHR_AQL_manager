@@ -47,8 +47,7 @@ label{
 
 
 #listcontainer {
- 
-  flex: 1 1 auto; /* grow to fill space */
+   flex: 1 1 auto; /* grow to fill space */
   overflow: auto;
   margin-top: 10px;
   border-radius: 5px;
@@ -95,6 +94,7 @@ input[type="file"]::file-selector-button:hover {
 ul{
     list-style: none;
     padding: 5px;
+    padding-top: 0px;
     background-color: white;
     color: #A20707;
     font-weight: bold;
@@ -159,6 +159,7 @@ li:hover {
     font-size: 11pt;
     padding-left: 5pt;
     border: 1px solid #ccc;
+    margin-bottom: 10px;
 }
 
 textarea, .highlighted, .outputBox2 {
