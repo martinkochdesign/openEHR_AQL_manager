@@ -163,6 +163,7 @@ document.getElementById('add_aql').onclick = function () {
             if (selectedListItem) selectedListItem.classList.remove('selected');
             li.classList.add('selected');
             selectedListItem = li;
+            toggleInputDisabled(false);
         }
     });
 };
