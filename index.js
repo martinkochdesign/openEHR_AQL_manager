@@ -89,6 +89,11 @@ function loadAQL(index) {
 
 
 document.getElementById('save_aql').onclick = function () {
+    refreshAqlList(true);
+};
+
+
+function refreshAqlList(download){
     //if (selectedIndex < 0) return;
 
     const updated = {
@@ -120,11 +125,12 @@ document.getElementById('save_aql').onclick = function () {
             selectedListItem = li;
         }
     });
-
+    
     // Optional: offer to download updated file
-    triggerDownload();
-};
-
+    if (download){
+        triggerDownload();
+    }
+}
 
 document.getElementById('add_aql').onclick = function () {
     // Generate a unique title
