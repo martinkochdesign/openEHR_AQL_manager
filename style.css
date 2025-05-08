@@ -127,7 +127,7 @@ li {
     padding: 5px;
     background-color: white;
     font-size: 10pt;
-    
+    font-weight: normal;
 }
 
 li:hover {
