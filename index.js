@@ -304,6 +304,7 @@ document.getElementById('aqlstore').addEventListener('change', function (e) {
         }
     };
     reader.readAsText(file);
+	autoSaveToLocalStorage();
 });
 
 document.getElementById('save_aql').onclick = function () {
