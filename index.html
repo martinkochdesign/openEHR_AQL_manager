@@ -11,9 +11,15 @@
 
     <div id="leftbar">
         <h1>AQL Manager</h1>
-        <p id="version"><button id="clear_storage" title="Clear Local Storage">🗑️</button>Version 0.1.6</p>
-        <label id="file_label" for="aqlstore">Local AQL storage file:</label>
+        <p id="version"><button id="clear_storage" title="Clear Local Storage">🗑️</button>Version 0.2.0</p>   
+        <label for="aqlstore" class="custom-file-upload">
+            📤 Upload from JSON
+        </label>
         <input type="file" id="aqlstore" name="aqlstore" accept=".json" />
+
+        <input type="text" id="searchInput" placeholder="Filter AQL list..." />
+        <label id="checkBoxDescription"><input type="checkbox" id="includeDescription" /> Include description in filter</label>
+
         <div id="listcontainer">
             <ul id="aql_list">
             </ul>

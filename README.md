@@ -11,7 +11,27 @@ This is a proof of concept webpage that can be used to store and format openEHR 
 
 ## GUI overview
 
-![GUI](pics/0001.png)
+![GUI](pics/gui.png)
+
+**Elements of the User Interface**
+
+1. Button: Clear local storage
+2. Button: Upload an AQL collection from a local JSON file
+3. Input: AQL list is filtered by the input
+4. Checkbox: Includes the description of the AQL in the filter
+5. List of AQL currently in memory
+6. Button: Add a new AQL to the list
+7. Button: Download the whole AQL collection
+8. Button: Delete the selected AQL
+9. Input: Title of the selected AQL
+10. Input: Description of the selected AQL
+11. Button: Auto-format the AQL input field
+12. Input: Editor for the AQL
+13. Button: Download an image of the formatted AQL
+14. Output: AQL with highlighted keywords
+15. Button: Copy the cleaned up AQL to the clipboard
+16. Output: Cleaned up AQL as a online text without tabs or comments
+
 
 ## How to use this
 
@@ -81,14 +101,23 @@ When an AQL is selected you can make changes to the title, description and input
 
 Don't forget to save the selection after making changes.  
 
+### Searching for an AQL
+You can filter the list of AQL on the left hand side, by typing in the search bar above the list.
+By default, only the AQL titles are filtered. You can select the "Include description in filter" checkbox to include also the AQL descriptions in the filter.
+
+<img src="pics/filter.png" height="60">
+
 ### Starting with an AQL collection
 Instead of starting from scratch, you can load a JSON file with an AQL collection. Use the "Select file" button to do so:
 
-<img src="pics/0017.png" height="60">
+<img src="pics/0017.png" height="45">
+
+Note that the format of the saved file has to be a list of elements that have 3 attributes: title, description and AQL:
+<img src="pics/0008.png" height="120">
 
 
 ### Saving the AQL collection
-Use the "Save AQL collection" button to download the whole AQL collection:
+Use the "Download AQL collection" button to download the whole AQL collection:
 <img src="pics/0010.png" width="200">
 
 The whole AQL selection gets saved in a "aql_store_file.json" file. If this file already exists, a new file with "(N)" added to the name:

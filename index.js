@@ -1,5 +1,6 @@
+//INITIATE CONSTANTS
+let selectedAQL = null;
 let aqlData = [];
-let selectedIndex = -1;
 let selectedListItem = null;
 
 const inputBox = document.getElementById('inputBox');
@@ -11,7 +12,33 @@ const datatype_keywords = ['VERSION','EHR', 'CONTENT_ITEM', 'ENTRY', 'CARE_ENTRY
 const green_keywords = ['DESC','ASC','AS','DISTINCT', 'AND', 'OR', 'NOT', 'LIKE', 'matches', 'exists', '<', '>', '=', '!', 'true', 'false', 'NULL']
 let fileurl;
 
+
+
+//WORKFLOW AT FIRST EXECUTION
+
+//set all input fields to disabled
 toggleInputDisabled(true);
+
+// if there is local storage, load it
+window.onload = function () {
+    const stored = localStorage.getItem('aqlData');
+    if (stored) {
+        aqlData = JSON.parse(stored);
+        populateAQLList();
+    }
+};
+
+
+// FUNCTIONS
+
+const autoSaveToLocalStorage = debounce(() => {
+    if (selectedAQL) {
+        selectedAQL.title = document.getElementById('title').value;
+        selectedAQL.description = document.getElementById('descriptionBox').value;
+        selectedAQL.AQL = document.getElementById('inputBox').value;
+    }
+    localStorage.setItem('aqlData', JSON.stringify(aqlData));
+}, 500);
 
 function toggleInputDisabled(state){
     document.getElementById('title').disabled = state;
@@ -19,104 +46,71 @@ function toggleInputDisabled(state){
     document.getElementById('inputBox').disabled = state;
 }
 
-
-document.getElementById('aqlstore').addEventListener('change', function (e) {
-    
-    const file = e.target.files[0];
-    if (!file) return;
-    selectedIndex = -1;
-    selectedListItem = null;
-    aqlData = [];
-    clearFields();
-
-    const reader = new FileReader();
-    reader.onload = function (event) {
-        try {
-            aqlData = JSON.parse(event.target.result);
-            populateAQLList();
-        } catch (err) {
-            alert("Invalid JSON file.");
-        }
-    };
-    reader.readAsText(file);
-});
+function loadAQL(aqlObject) {
+    selectedAQL = aqlObject;
+    document.getElementById('title').value = aqlObject.title;
+    document.getElementById('descriptionBox').value = aqlObject.description;
+    document.getElementById('inputBox').value = aqlObject.AQL;
+    toggleInputDisabled(false);
+    updateText();
+}
 
 
-function populateAQLList() {
+
+function populateAQLList(filterText = '') {
     const list = document.getElementById('aql_list');
     list.innerHTML = '';
-    aqlData.sort((a, b) => a.title.localeCompare(b.title));
 
-    //localStorage.setItem('aqlData', JSON.stringify(aqlData));
+    const includeDescription = document.getElementById('includeDescription').checked;
+    const lowerFilter = filterText.toLowerCase();
 
+    aqlData
+        .filter(item => {
+            const titleMatch = item.title.toLowerCase().includes(lowerFilter);
+            const descMatch = includeDescription && item.description.toLowerCase().includes(lowerFilter);
+            return titleMatch || descMatch;
+        })
+        .sort((a, b) => a.title.localeCompare(b.title))
+        .forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item.title;
 
-    aqlData.forEach((item, index) => {
-        const li = document.createElement('li');
-        li.textContent = item.title;
+            li.onclick = () => {
+                // Auto-save previous
+                if (selectedAQL) {
+                    selectedAQL.title = document.getElementById('title').value;
+                    selectedAQL.description = document.getElementById('descriptionBox').value;
+                    selectedAQL.AQL = document.getElementById('inputBox').value;
+                }
 
-        li.onclick = () => {
-            // Auto-save current selection before switching
-            if (selectedIndex >= 0) {
-                aqlData[selectedIndex] = {
-                    title: document.getElementById('title').value,
-                    description: document.getElementById('descriptionBox').value,
-                    AQL: document.getElementById('inputBox').value,
-                };
-            }
+                loadAQL(item);
 
-            loadAQL(index); // Load new selection
+                if (selectedListItem) selectedListItem.classList.remove('selected');
+                li.classList.add('selected');
+                selectedListItem = li;
+               
 
-            // Highlight selection
-            if (selectedListItem) selectedListItem.classList.remove('selected');
-            li.classList.add('selected');
-            selectedListItem = li;
-            toggleInputDisabled(false);
-        };
+            };
 
-        list.appendChild(li);
-    });
+            list.appendChild(li);
+        });
 }
 
 
-function loadAQL(index) {
-    selectedIndex = index;
-    const item = aqlData[index];
-    document.getElementById('title').value = item.title;
-    document.getElementById('descriptionBox').value = item.description;
-    document.getElementById('inputBox').value = item.AQL;
-    updateText(); // Optional: update display if needed
-}
-
-
-document.getElementById('save_aql').onclick = function () {
-    refreshAqlList(true);
-};
 
 
 function refreshAqlList(download){
-    //if (selectedIndex < 0) return;
+    if (!selectedAQL) return;
+    selectedAQL.title = document.getElementById('title').value;
+    selectedAQL.description = document.getElementById('descriptionBox').value;
+    selectedAQL.AQL = document.getElementById('inputBox').value;
 
-    const updated = {
-        title: document.getElementById('title').value,
-        description: document.getElementById('descriptionBox').value,
-        AQL: document.getElementById('inputBox').value,
-    };
-
-    // Update the selected item
-    aqlData[selectedIndex] = updated;
-
-    // Save the title before sorting
-    const currentTitle = updated.title;
-
-    // Repopulate and re-select by title
+    const currentTitle = selectedAQL.title;
     populateAQLList();
 
-    // Recalculate the index after sorting
-    const newIndex = aqlData.findIndex(a => a.title === currentTitle);
-    selectedIndex = newIndex;
-    loadAQL(newIndex);
+    const newItem = aqlData.find(a => a.title === currentTitle);
+    loadAQL(newItem);
 
-    // Re-highlight
     const listItems = document.querySelectorAll('#aql_list li');
     listItems.forEach(li => {
         if (li.textContent === currentTitle) {
@@ -125,59 +119,11 @@ function refreshAqlList(download){
             selectedListItem = li;
         }
     });
-    
-    // Optional: offer to download updated file
+
     if (download){
         triggerDownload();
     }
 }
-
-document.getElementById('add_aql').onclick = function () {
-    // Generate a unique title
-    let baseTitle = "New AQL";
-    let title = baseTitle;
-    let counter = 1;
-    const existingTitles = new Set(aqlData.map(a => a.title));
-
-    while (existingTitles.has(title)) {
-        title = `${baseTitle} (${counter++})`;
-    }
-
-    const newEntry = {
-        title: title,
-        description: "",
-        AQL: ""
-    };
-
-    aqlData.push(newEntry);
-    populateAQLList();
-
-    // Find new index (after sorting) and load it
-    const newIndex = aqlData.findIndex(a => a.title === title);
-    loadAQL(newIndex);
-
-    // Highlight new item
-    const listItems = document.querySelectorAll('#aql_list li');
-    listItems.forEach(li => {
-        if (li.textContent === title) {
-            if (selectedListItem) selectedListItem.classList.remove('selected');
-            li.classList.add('selected');
-            selectedListItem = li;
-            toggleInputDisabled(false);
-        }
-    });
-};
-
-document.getElementById('delete_aql').onclick = function () {
-    if (selectedIndex < 0) return;
-    aqlData.splice(selectedIndex, 1);
-    selectedIndex = -1;
-    selectedListItem = null;
-    populateAQLList();
-    clearFields();
-    toggleInputDisabled(true);
-    //triggerDownload();
-};
 
 function clearFields() {
     document.getElementById('title').value = '';
@@ -209,7 +155,6 @@ function handleTab(event) {
       updateText();
     }
   }
-
 
   function updateText() {
     const rawText = inputBox.value;
@@ -309,33 +254,11 @@ function downloadHighlightAsImage() {
     });
   }
 
-  function copyOutput() {
+function copyOutput() {
     navigator.clipboard.writeText(outputBox2.innerHTML)
       .then(() => alert("Cleaned AQL copied to clipboard!"))
       .catch(() => alert("Failed to copy."));
   }
-
-
-
-
-  /*
-  window.addEventListener('beforeunload', function (e) {
-    if (aqlData!=[]) {  
-        triggerDownload(); // your existing function to save file
-        e.preventDefault();
-        e.returnValue = ''; // Required by some browsers
-    }
-});
-*/
-
-window.onload = function () {
-    const stored = localStorage.getItem('aqlData');
-    if (stored) {
-        aqlData = JSON.parse(stored);
-        populateAQLList();
-    }
-};
-
 
 // Debounce utility to avoid excessive saves
 function debounce(func, delay) {
@@ -346,51 +269,155 @@ function debounce(func, delay) {
     };
 }
 
-const autoSaveToLocalStorage = debounce(() => {
-    /*if (selectedListItem == null){
-        document.getElementById('title').disabled = true;
-        document.getElementById('descriptionBox').disabled = true;
-        document.getElementById('inputBox').disabled = true;
-    }else{
-        document.getElementById('title').disabled = false;
-        document.getElementById('descriptionBox').disabled = false;
-        document.getElementById('inputBox').disabled = false;
-    }*/
+
+
+// EVENT LISTENERS AND STUFF THAT HAPPENS AT INTERACTIONS
+//elements on change, click, etc.
+document.getElementById('aqlstore').addEventListener('click', function () {
+    // Clear the input value so selecting the same file again still triggers 'change'
+    this.value = '';
+});
+
+document.getElementById('aqlstore').addEventListener('change', function (e) {
     
-    // Save the currently active AQL entry before serializing
-    if (selectedIndex >= 0) {
-        aqlData[selectedIndex] = {
-            title: document.getElementById('title').value,
-            description: document.getElementById('descriptionBox').value,
-            AQL: document.getElementById('inputBox').value,
-        };
+    const file = e.target.files[0];
+    if (!file) return;
+    selectedAQL = null;
+    selectedListItem = null;
+    aqlData = [];
+    clearFields();
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+        try {
+            aqlData = JSON.parse(event.target.result);
+            populateAQLList();
+            document.getElementById('searchInput').value=''
+        } catch (err) {
+            alert("Invalid JSON file.");
+        }
+    };
+    reader.readAsText(file);
+});
+
+document.getElementById('save_aql').onclick = function () {
+    refreshAqlList(true);
+};
+
+document.getElementById('add_aql').onclick = function () {
+    
+    //document.getElementById('searchInput').value='';
+    // Generate a unique title
+    let baseTitle = "New AQL";
+    let title = baseTitle;
+    let counter = 1;
+    const existingTitles = new Set(aqlData.map(a => a.title));
+
+    while (existingTitles.has(title)) {
+        title = `${baseTitle} (${counter++})`;
     }
 
-    localStorage.setItem('aqlData', JSON.stringify(aqlData));
-}, 500); // adjust delay as needed
+    const newEntry = {
+        title: title,
+        description: "",
+        AQL: ""
+    };
 
-document.addEventListener('keydown', autoSaveToLocalStorage);
-document.addEventListener('click', autoSaveToLocalStorage);
+    aqlData.push(newEntry);
+    populateAQLList( document.getElementById('searchInput').value);
 
+    // Find new index (after sorting) and load it
+    /*const newIndex = aqlData.findIndex(a => a.title === title);
+    loadAQL(newIndex);*/
+    let currentTitle = title;
+    const newItem = aqlData.find(a => a.title === currentTitle);
+    loadAQL(newItem);
 
+    // Highlight new item
+    const listItems = document.querySelectorAll('#aql_list li');
+    listItems.forEach(li => {
+        if (li.textContent === title) {
+            if (selectedListItem) selectedListItem.classList.remove('selected');
+            li.classList.add('selected');
+            selectedListItem = li;
+            toggleInputDisabled(false);
+        }
+    });
+};
+
+/*
+document.getElementById('delete_aql').onclick = function () {
+    //document.getElementById('searchInput').value='';
+    if (selectedIndex < 0) return;
+    aqlData.splice(selectedIndex, 1);
+    selectedIndex = -1;
+    selectedListItem = null;
+    populateAQLList();
+    clearFields();
+    toggleInputDisabled(true);
+    //triggerDownload();
+};
+*/
+document.getElementById('delete_aql').onclick = function () {
+    if (!selectedAQL) return;
+
+    // Remove the selected AQL from the array
+    aqlData = aqlData.filter(item => item !== selectedAQL);
+
+    // Clear selection
+    selectedAQL = null;
+    selectedListItem = null;
+
+    // Clear UI
+    populateAQLList(document.getElementById('searchInput').value);
+    clearFields();
+    toggleInputDisabled(true);
+
+    // Optional: clear search input too
+    //document.getElementById('searchInput').value = '';
+};
 
 document.getElementById('clear_storage').onclick = function () {
     if (confirm("Are you sure you want to clear all saved AQL data? This cannot be undone.")) {
         localStorage.removeItem('aqlData');
         aqlData = [];
-        selectedIndex = -1;
+        selectedAQL = null;
         selectedListItem = null;
         document.getElementById('aql_list').innerHTML = "";
+        document.getElementById('searchInput').value = "";
         clearFields();
-        /*document.getElementById('title').value = '';
-        document.getElementById('descriptionBox').value = '';
-        document.getElementById('inputBox').value = '';
-        document.getElementById('aqlstore').value = '';
-        document.getElementById('highlightBox').innerHTML = '';
-        document.getElementById('outputBox2').innerHTML = '';*/
-
         alert("Local storage has been cleared.");
         updateText();
         toggleInputDisabled(true);
     }
 };
+
+// event listeners
+// save collection when closing window
+  /*
+  window.addEventListener('beforeunload', function (e) {
+    if (aqlData!=[]) {  
+        triggerDownload(); // your existing function to save file
+        e.preventDefault();
+        e.returnValue = ''; // Required by some browsers
+    }
+});
+*/
+
+document.addEventListener('keydown', autoSaveToLocalStorage);
+document.addEventListener('click', autoSaveToLocalStorage);
+document.getElementById('searchInput').addEventListener('input', function () {
+    populateAQLList(this.value);
+});
+
+document.getElementById('includeDescription').addEventListener('change', function () {
+    const searchValue = document.getElementById('searchInput').value;
+    populateAQLList(searchValue);
+});
+
+
+
+
+
+
+
