@@ -234,7 +234,9 @@ textarea, .highlighted, .outputBox2 {
     margin-bottom: 5px;
     width: 230px;
     border-radius: 5pt;
-    background-color: #F5F5F5;
+    /*background-color: #F5F5F5;*/
+    background-color: #f5f5f5;
+    box-shadow: 1px 1px 3px gray;
   }
 
   .topbutton,   #clear_storage{
@@ -257,10 +259,31 @@ textarea, .highlighted, .outputBox2 {
   font-family: monospace;
   padding-left:5px;
   margin-top: 10pt;
-  height: 30px;
+  min-height: 20pt;
 }
 
-#checkBoxDescription{
+/*#checkBoxDescription{
   margin-top: 5pt;
   color: white;
+  font-size: 14px;
+}*/
+
+input[type="checkbox"] {
+  cursor:pointer;
+}
+
+#checkBoxDescription {
+  margin-top: 5pt;
+  display: flex;
+  align-items: center; /* Vertically center the label text */
+  color: white;
+  gap: 0.25em; /* Optional: space between checkbox and text */
+  font-size: 14px; /* Optional: control label text size */
+  cursor:pointer;
+}
+
+#checkBoxDescription input[type="checkbox"] {
+  
+  width: 16px;   /* Increase checkbox size */
+  height: 16px;  /* Increase checkbox size */
 }

@@ -91,6 +91,12 @@ function populateAQLList(filterText = '') {
                
 
             };
+            
+            // Reapply selected class if this item is currently selected
+            if (selectedAQL && item.title === selectedAQL.title) {
+                li.classList.add('selected');
+                selectedListItem = li;
+            }
 
             list.appendChild(li);
         });
