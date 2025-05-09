@@ -236,7 +236,7 @@ textarea, .highlighted, .outputBox2 {
     border-radius: 5pt;
     /*background-color: #F5F5F5;*/
     background-color: #f5f5f5;
-    box-shadow: 1px 1px 3px gray;
+    /*box-shadow: 1px 1px 3px gray;*/
   }
 
   .topbutton,   #clear_storage{
