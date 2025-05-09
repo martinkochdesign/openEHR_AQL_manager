@@ -126,6 +126,7 @@ li {
     background-color: white;
     font-size: 10pt;
     font-weight: normal;
+	border-bottom: 1px solid lightgrey;
 }
 
 li:hover {
