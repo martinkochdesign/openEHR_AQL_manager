@@ -190,8 +190,9 @@ function handleTab(event) {
 	// Highlight data type keywords
     datatype_keywords.forEach(kw => {
       //const regex = new RegExp(`\\b(${dtkw})\\b`, 'gi');
-      const regex =new RegExp(`(?<![\\w-])(${kw})(?![\\w-])`, 'gi');
-      highlightedText = highlightedText.replace(regex, '<span class="datatype_keyword">$1</span>');
+      //const regex =new RegExp(`(?<![\\w-])(${kw})(?![\\w-])`, 'gi');
+      const regex =new RegExp(`(?<![\\w-])(${kw})(?![\\w-]) `, 'gi');
+      highlightedText = highlightedText.replace(regex, '<span class="datatype_keyword">$1</span> ');
     });
     
     // Highlight other keywords
