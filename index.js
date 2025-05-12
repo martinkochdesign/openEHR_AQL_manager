@@ -41,9 +41,14 @@ const autoSaveToLocalStorage = debounce(() => {
 }, 500);
 
 function toggleInputDisabled(state){
+    //input fields
     document.getElementById('title').disabled = state;
     document.getElementById('descriptionBox').disabled = state;
     document.getElementById('inputBox').disabled = state;
+    //buttons
+    document.getElementById('clipboardButton').disabled = state;
+    document.getElementById('snapshotButton').disabled = state;
+    document.getElementById('formatButton').disabled = state;
 }
 
 function loadAQL(aqlObject) {
@@ -228,10 +233,14 @@ function handleTab(event) {
     rawText= rawText.replace(/\s+/g, ' ').trim();
 
     // Add line breaks before and after whole keywords
-    const formatted = rawText.replace(
-      new RegExp(`\\b(${keywords.join('|')})\\b`, 'gi'),
+    let formatted = rawText.replace(
+      new RegExp(`\\b(${keywords.join('|')}) \\b`, 'gi'),
       '\n$1\n\t'
     );
+
+    formatted = formatted.replace(/, /g,",\n\t");
+    formatted = formatted.replace(/,\n\t\'/g,",\'");
+
     // Remove multiple blank lines caused by formatting
     const cleaned = formatted.replace(/\n{2,}/g, '\n');
 
@@ -304,10 +313,13 @@ document.getElementById('aqlstore').addEventListener('change', function (e) {
         }
     };
     reader.readAsText(file);
+    autoSaveToLocalStorage();
 });
+
 
 document.getElementById('save_aql').onclick = function () {
     refreshAqlList(true);
+    populateAQLList(document.getElementById('searchInput').value);
 };
 
 document.getElementById('add_aql').onclick = function () {

@@ -115,7 +115,6 @@ ul{
 }
 
 
-
 li {
     cursor: pointer;
     text-decoration: none;
@@ -126,6 +125,7 @@ li {
     background-color: white;
     font-size: 10pt;
     font-weight: normal;
+    border-bottom: 1px solid lightgrey;
 }
 
 li:hover {
@@ -236,7 +236,7 @@ textarea, .highlighted, .outputBox2 {
     border-radius: 5pt;
     /*background-color: #F5F5F5;*/
     background-color: #f5f5f5;
-    box-shadow: 1px 1px 3px gray;
+    /*box-shadow: 1px 1px 3px gray;*/
   }
 
   .topbutton,   #clear_storage{

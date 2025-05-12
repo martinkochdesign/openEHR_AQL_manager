@@ -11,7 +11,7 @@
 
     <div id="leftbar">
         <h1>AQL Manager</h1>
-        <p id="version"><button id="clear_storage" title="Clear Local Storage">🗑️</button>Version 0.2.1</p>   
+        <p id="version"><button id="clear_storage" title="Clear Local Storage">🗑️</button>Version 0.2.3</p>   
         <label for="aqlstore" class="custom-file-upload">
             📤 Upload from JSON
         </label>
@@ -45,15 +45,15 @@
             <textarea id="descriptionBox" oninput="" onkeydown="handleTab(event)" placeholder="Type your description here..."></textarea>
         </div>
         <div>
-            <label><strong>AQL Input:</strong>  </label><button class="topbutton" onclick="autoFormat()" title="Auto-Format">🤖</button>
+            <label><strong>AQL Input:</strong>  </label><button id="formatButton" class="topbutton" onclick="autoFormat()" title="Auto-Format">🤖</button>
             <textarea id="inputBox" oninput="updateText()" onkeydown="handleTab(event)" placeholder="Type your AQL query here..."></textarea>
         </div>
         <div>
-            <label><strong>Formatted AQL:</strong></label>  <button class="topbutton" onclick="downloadHighlightAsImage()" title="Save as image">📸</button>
+            <label><strong>Formatted AQL:</strong></label>  <button id="snapshotButton" class="topbutton" onclick="downloadHighlightAsImage()" title="Save as image">📸</button>
             <div id="highlightBox" class="highlighted"></div>
         </div>
         <div>
-            <label><strong>Clean AQL:</strong></label>  <button class="topbutton" onclick="copyOutput()" title="Copy to clipboard">📋</button>
+            <label><strong>Clean AQL:</strong></label>  <button id='clipboardButton' class="topbutton" onclick="copyOutput()" title="Copy to clipboard">📋</button>
             <div id="outputBox2" class="outputBox2"></div>
         </div>
         <span class="copyright">
