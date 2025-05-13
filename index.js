@@ -117,7 +117,8 @@ function refreshAqlList(download){
     selectedAQL.AQL = document.getElementById('inputBox').value;
 
     const currentTitle = selectedAQL.title;
-    populateAQLList();
+    //populateAQLList();
+    populateAQLList(document.getElementById('searchInput').value);
 
     const newItem = aqlData.find(a => a.title === currentTitle);
     loadAQL(newItem);
@@ -134,6 +135,7 @@ function refreshAqlList(download){
     if (download){
         triggerDownload();
     }
+    
 }
 
 function clearFields() {
