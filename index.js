@@ -31,6 +31,41 @@ window.onload = function () {
 
 // FUNCTIONS
 
+function preparePostmanPayload() {
+    // Get the container with the HTML content
+    const container = document.getElementById("highlightBox");
+
+    // Find all spans with class "parameter_keyword"
+    const spans = container.querySelectorAll("span.parameter_keyword");
+
+    // Extract the text content (e.g., "$ehr_id")
+    const keywords = Array.from(spans).map(span => span.textContent.trim());
+
+    // Create the JSON structure
+    const jsonStructure = {
+        q:"",
+        offset:0,
+        fetch:100,
+        query_parameters: {}
+    };
+
+    // Add each keyword to the JSON with an empty string as value
+    keywords.forEach(word => {
+        // Optionally, remove the `$` prefix if you want just the word
+        const cleanWord = word.startsWith('$') ? word.slice(1) : word;
+        jsonStructure.query_parameters[cleanWord] = "";
+    });
+
+    jsonStructure.q=document.getElementById('outputBox2').innerHTML;
+
+    // Output the result (can be stringified if needed)
+    console.log(JSON.stringify(jsonStructure, null, 4));
+    document.getElementById('outputPostman').innerText=JSON.stringify(jsonStructure, null, 4);
+    return jsonStructure;
+}
+
+
+
 const autoSaveToLocalStorage = debounce(() => {
     if (selectedAQL) {
         selectedAQL.title = document.getElementById('title').value;
@@ -47,6 +82,7 @@ function toggleInputDisabled(state){
     document.getElementById('inputBox').disabled = state;
     //buttons
     document.getElementById('clipboardButton').disabled = state;
+    document.getElementById('clipboardButton2').disabled = state;
     document.getElementById('snapshotButton').disabled = state;
     document.getElementById('formatButton').disabled = state;
 }
@@ -144,6 +180,7 @@ function clearFields() {
     document.getElementById('inputBox').value = '';
     document.getElementById('highlightBox').innerHTML = '';
     document.getElementById('outputBox2').innerHTML = '';
+    document.getElementById('outputPostman').innerHTML = '';
 }
 
 function triggerDownload() {
@@ -229,6 +266,8 @@ function handleTab(event) {
       .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
 
     highlightBox.innerHTML = highlightedText;
+
+    preparePostmanPayload();
   }
 
   function autoFormat() {
@@ -273,8 +312,14 @@ function downloadHighlightAsImage() {
   }
 
 function copyOutput() {
-    navigator.clipboard.writeText(outputBox2.innerHTML)
+    navigator.clipboard.writeText(outputBox2.innerText)
       .then(() => alert("Cleaned AQL copied to clipboard!"))
+      .catch(() => alert("Failed to copy."));
+  }
+
+  function copyPostmanOutput() {
+    navigator.clipboard.writeText(outputPostman.innerText)
+      .then(() => alert("Postman payload copied to clipboard!"))
       .catch(() => alert("Failed to copy."));
   }
 

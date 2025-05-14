@@ -130,14 +130,14 @@ li {
 
 li:hover {
     background-color: #A20707;
-    font-weight: bold;
+    /*font-weight: bold;*/
     color:white;
 }
 
 #aql_list li.selected {
-    background-color: white;
-    font-weight: bold;
-    color: #A20707;
+    background-color: salmon;
+    /*font-weight: bold;*/
+    color: white;
     cursor: pointer;
 }
 
@@ -160,7 +160,7 @@ li:hover {
     margin-bottom: 10px;
 }
 
-textarea, .highlighted, .outputBox2 {
+textarea, .highlighted, .outputBox2, .outputPostman {
     width: 100%;
     min-height: 200px;
     font-family: monospace;
@@ -182,13 +182,11 @@ textarea, .highlighted, .outputBox2 {
     border-radius: 0pt;
   }
 
-  .outputBox2 {
+  .outputBox2, .outputPostman {
     background-color: #f9f9f9;
     color: #333;
     min-height: 30px;
   }
-
-
 
   #descriptionBox{
     min-height: 80px;
