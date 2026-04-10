@@ -2,8 +2,6 @@
 # openEHR AQL Manager
 
 This is a proof of concept webpage that can be used to store and format openEHR compliant AQL queries.
-Access online version here:
-https://martinkochdesign.github.io/openEHR_AQL_manager/
 
 ## Precautions
 
@@ -54,6 +52,12 @@ Change the title, the description and finally add your AQL to the "AQL Input".
 You can format your AQL input with line breaks, spaces and tabs. 
 
 You can use the auto-format button to enter automatically line breaks at the major keywords. 
+
+Use "//" to enter comments.
+
+Use "$" to add variables (for example "$ehr_id").
+
+Add values for these parematers by adding comments in the format of <strong>// @param template_id = "my_awesome_template_v0"</strong>.
 
 <img src="pics/0007.png" height="150">
 

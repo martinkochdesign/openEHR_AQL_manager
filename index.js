@@ -24,43 +24,114 @@ window.onload = function () {
     const stored = localStorage.getItem('aqlData');
     if (stored) {
         aqlData = JSON.parse(stored);
+
+        // Normalize older entries
+        aqlData.forEach(a => {
+            if (!a.paramValues) a.paramValues = {};
+        });
+        
         populateAQLList();
     }
 };
 
 
 // FUNCTIONS
+function getDetectedParamsFromHighlight() {
+  const container = document.getElementById("highlightBox");
+  const spans = container.querySelectorAll("span.parameter_keyword");
+  const params = Array.from(spans).map(s => s.textContent.trim()); // "$ehr_id"
+  // unique + strip "$"
+  return [...new Set(params)]
+    .map(p => p.startsWith('$') ? p.slice(1) : p)
+    .filter(Boolean);
+}
+
+function renderParamEditor() {
+  const editor = document.getElementById('paramEditor');
+  if (!editor) return;
+
+  if (!selectedAQL) {
+    editor.innerHTML = '';
+    return;
+  }
+
+  const params = getDetectedParamsFromHighlight();
+  selectedAQL.paramValues = selectedAQL.paramValues || {};
+
+  if (params.length === 0) {
+    editor.innerHTML = '<div><b>Query parameters:</b> none detected</div>';
+    return;
+  }
+
+  const rows = params.map(name => {
+    const val = selectedAQL.paramValues[name] ?? '';
+    return `
+      <div style="display:flex; gap:8px; margin:6px 0; align-items:center;">
+        <label style="min-width:160px;">$${name}</label>
+        <input data-param="${name}" value="${String(val).replace(/"/g, '&quot;')}"
+               style="flex:1;" placeholder="add example value..." />
+      </div>
+    `;
+  }).join('');
+
+  editor.innerHTML = `<div><b>Query parameters:</b></div>${rows}`;
+
+  editor.querySelectorAll('input[data-param]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const key = inp.getAttribute('data-param');
+      selectedAQL.paramValues[key] = inp.value;
+
+      // Persist using your existing mechanism
+      autoSaveToLocalStorage();
+
+      // Update payload instantly
+      preparePostmanPayload();
+    });
+  });
+}
+
+function parseParamDefaultsFromAql(rawText) {
+  const defaults = {};
+  const re = /^\s*\/\/\s*@param\s+(\$?[A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/gm;
+
+  let m;
+  while ((m = re.exec(rawText)) !== null) {
+    const name = m[1].startsWith('$') ? m[1].slice(1) : m[1];
+    const rawVal = m[2];
+
+    // Try JSON parse to allow "strings", numbers, true/false, arrays, objects.
+    // Fallback: keep as plain string.
+    let val;
+    try { val = JSON.parse(rawVal); } catch { val = rawVal; }
+
+    defaults[name] = val;
+  }
+  return defaults;
+}
 
 function preparePostmanPayload() {
-    // Get the container with the HTML content
-    const container = document.getElementById("highlightBox");
+  const container = document.getElementById("highlightBox");
+  const spans = container.querySelectorAll("span.parameter_keyword");
+  const keywords = Array.from(spans).map(span => span.textContent.trim());
 
-    // Find all spans with class "parameter_keyword"
-    const spans = container.querySelectorAll("span.parameter_keyword");
+  const jsonStructure = {
+    q: "",
+    offset: 0,
+    fetch: 100,
+    query_parameters: {}
+  };
 
-    // Extract the text content (e.g., "$ehr_id")
-    const keywords = Array.from(spans).map(span => span.textContent.trim());
+  const saved = (selectedAQL && selectedAQL.paramValues) ? selectedAQL.paramValues : {};
 
-    // Create the JSON structure
-    const jsonStructure = {
-        q: "",
-        offset: 0,
-        fetch: 100,
-        query_parameters: {}
-    };
+  keywords.forEach(word => {
+    const cleanWord = word.startsWith('$') ? word.slice(1) : word;
+    jsonStructure.query_parameters[cleanWord] = saved[cleanWord] ?? "";
+  });
 
-    // Add each keyword to the JSON with an empty string as value
-    keywords.forEach(word => {
-        const cleanWord = word.startsWith('$') ? word.slice(1) : word;
-        jsonStructure.query_parameters[cleanWord] = "";
-    });
+  jsonStructure.q = document.getElementById('outputBox2').textContent;
 
-    // Use textContent instead of innerHTML
-    jsonStructure.q = document.getElementById('outputBox2').textContent;
-
-    console.log(JSON.stringify(jsonStructure, null, 4));
-    document.getElementById('outputPostman').innerText = JSON.stringify(jsonStructure, null, 4);
-    return jsonStructure;
+  document.getElementById('outputPostman').innerText = JSON.stringify(jsonStructure, null, 4);
+  return jsonStructure;
 }
 
 
@@ -205,7 +276,18 @@ function handleTab(event) {
   }
 
   function updateText() {
+
     const rawText = inputBox.value;
+
+    if (selectedAQL) {
+    const defaults = parseParamDefaultsFromAql(rawText);
+    selectedAQL.paramValues = selectedAQL.paramValues || {};
+    Object.entries(defaults).forEach(([k, v]) => {
+        if (selectedAQL.paramValues[k] === undefined || selectedAQL.paramValues[k] === "") {
+        selectedAQL.paramValues[k] = v;
+        }
+    });
+    }
 
     const cleanedText = rawText
       .replace(/\/\/.*$/gm, '')      // Remove '//' comments
@@ -264,6 +346,8 @@ function handleTab(event) {
       .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
 
     highlightBox.innerHTML = highlightedText;
+
+    renderParamEditor();
 
     preparePostmanPayload();
   }
