@@ -43,27 +43,25 @@ function preparePostmanPayload() {
 
     // Create the JSON structure
     const jsonStructure = {
-        q:"",
-        offset:0,
-        fetch:100,
+        q: "",
+        offset: 0,
+        fetch: 100,
         query_parameters: {}
     };
 
     // Add each keyword to the JSON with an empty string as value
     keywords.forEach(word => {
-        // Optionally, remove the `$` prefix if you want just the word
         const cleanWord = word.startsWith('$') ? word.slice(1) : word;
         jsonStructure.query_parameters[cleanWord] = "";
     });
 
-    jsonStructure.q=document.getElementById('outputBox2').innerHTML;
+    // Use textContent instead of innerHTML
+    jsonStructure.q = document.getElementById('outputBox2').textContent;
 
-    // Output the result (can be stringified if needed)
     console.log(JSON.stringify(jsonStructure, null, 4));
-    document.getElementById('outputPostman').innerText=JSON.stringify(jsonStructure, null, 4);
+    document.getElementById('outputPostman').innerText = JSON.stringify(jsonStructure, null, 4);
     return jsonStructure;
 }
-
 
 
 const autoSaveToLocalStorage = debounce(() => {
