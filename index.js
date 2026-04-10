@@ -59,7 +59,8 @@ function renderParamEditor() {
   selectedAQL.paramValues = selectedAQL.paramValues || {};
 
   if (params.length === 0) {
-    editor.innerHTML = '<div><b>Query parameters:</b> none detected</div>';
+    //editor.innerHTML = '<div><b>Query parameters:</b> none detected</div>';
+    editor.innerHTML = ''; 
     return;
   }
 
@@ -67,8 +68,8 @@ function renderParamEditor() {
     const val = selectedAQL.paramValues[name] ?? '';
     return `
       <div style="display:flex; gap:8px; margin:6px 0; align-items:center;">
-        <label style="min-width:160px;">$${name}</label>
-        <input data-param="${name}" value="${String(val).replace(/"/g, '&quot;')}"
+        <label style="min-width:120px;">$${name}</label>
+        <input class="query_parameter_input" data-param="${name}" value="${String(val).replace(/"/g, '&quot;')}"
                style="flex:1;" placeholder="add example value..." />
       </div>
     `;
@@ -216,7 +217,7 @@ function populateAQLList(filterText = '') {
 
 
 function refreshAqlList(download){
-    if (!selectedAQL) return;
+    if (selectedAQL) {
     selectedAQL.title = document.getElementById('title').value;
     selectedAQL.description = document.getElementById('descriptionBox').value;
     selectedAQL.AQL = document.getElementById('inputBox').value;
@@ -236,6 +237,7 @@ function refreshAqlList(download){
             selectedListItem = li;
         }
     });
+  }
 
     if (download){
         triggerDownload();

@@ -285,3 +285,10 @@ input[type="checkbox"] {
   width: 16px;   /* Increase checkbox size */
   height: 16px;  /* Increase checkbox size */
 }
+
+.query_parameter_input{
+  max-width: 500px;
+  border-radius: 5pt;
+  padding: 5pt;
+  border: 1px solid #ccc;
+}
