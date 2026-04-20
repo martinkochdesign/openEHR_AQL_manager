@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AQL Manager User Manual</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg-main: #f5f5f7;
+      --bg-content: white;
+      --bg-nav: #111827;
+      --bg-nav-active: #1f2937;
+      --text-main: #111827;
+      --text-muted: #4b5563;
+      --accent: #2563eb;
+      --accent-soft: rgba(37, 99, 235, 0.12);
+      --border-subtle: #e5e7eb;
+      --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: var(--font-body);
+      color: var(--text-main);
+      background: var(--bg-main);
+    }
+
+    body {
+      display: flex;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Layout */
+    .sidebar {
+      width: 280px;
+      background: var(--bg-nav);
+      color: #e5e7eb;
+      padding: 1.2rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      border-right: 1px solid #00000033;
+      overflow-y: auto;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .sidebar-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #9ca3af;
+      padding: 0 0.75rem 0.25rem;
+      border-bottom: 1px solid #4b556350;
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-nav {
+      list-style: none;
+      margin: 0;
+      padding: 0.25rem 0.25rem 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .sidebar-nav li {
+      margin: 0;
+      padding: 0;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 0.35rem;
+      color: #e5e7eb;
+      text-decoration: none;
+      line-height: 1.4;
+      transition: background 0.12s ease, color 0.12s ease, padding-left 0.12s ease;
+      border-left: 2px solid transparent;
+      word-break: break-word;
+    }
+
+    .sidebar-link:hover {
+      background: #4b55634d;
+      color: #ffffff;
+      border-left-color: var(--accent);
+      padding-left: 0.8rem;
+    }
+
+    .sidebar-link.active {
+      background: var(--bg-nav-active);
+      color: #ffffff;
+      border-left-color: var(--accent);
+      padding-left: 0.8rem;
+    }
+
+    .sidebar-link.level-1 { font-weight: 600; margin-top: 0.25rem; }
+    .sidebar-link.level-2 { padding-left: 1.4rem; font-weight: 500; font-size: 0.88rem; }
+    .sidebar-link.level-3 { padding-left: 2.0rem; font-size: 0.86rem; color: #d1d5db; }
+    .sidebar-link.level-4 { padding-left: 2.6rem; font-size: 0.84rem; color: #9ca3af; }
+
+    .content-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem 1.75rem 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* <-- add this */
+    }
+
+    main {
+      max-width: 950px;
+      width: 90%;
+      background: var(--bg-content);
+      border-radius: 0.75rem;
+      padding: 1.75rem 2rem 2.25rem;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.18),
+        0 0 0 1px rgba(148, 163, 184, 0.15);
+    }
+
+    /* Content styling */
+    h1, h2, h3, h4 {
+      scroll-margin-top: 90px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-top: 0;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.35rem;
+      margin-top: 1.75rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    h3 {
+      font-size: 1.12rem;
+      margin-top: 1.4rem;
+      margin-bottom: 0.4rem;
+    }
+
+    h4 {
+      font-size: 1rem;
+      margin-top: 1.15rem;
+      margin-bottom: 0.35rem;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0.45rem 0;
+      line-height: 1.55;
+    }
+
+    ul, ol {
+      margin: 0.35rem 0 0.75rem 1.3rem;
+      padding: 0;
+    }
+
+    li {
+      margin: 0.2rem 0;
+      line-height: 1.5;
+      word-wrap:break-word;
+    }
+
+    strong {
+      font-weight: 600;
+    }
+
+    code, pre, .code-inline {
+      font-family: var(--font-mono);
+      background: whitesmoke;
+      color: darkblue;
+      border-radius: 0.35rem;
+    }
+
+    .code-inline {
+      padding: 0.1rem 0.3rem;
+      font-size: 0.9em;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 0.4rem;
+      border: 1px solid var(--border-subtle);
+      /*background: #0b1120;*/
+      box-shadow: 5px 5px 5px rgba(15, 23, 42, 0.25);
+    }
+
+    hr {
+      border: none;
+      border-top: 1px dashed var(--border-subtle);
+      margin: 1.5rem 0;
+    }
+
+    .disclaimer-box {
+      border-left: 4px solid #f97316;
+      background: #fffbeb;
+      padding: 0.8rem 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.93rem;
+    }
+
+    .warning-box {
+      border-left: 4px solid #dc2626;
+      background: #fef2f2;
+      padding: 0.8rem 1rem;
+      border-radius: 0.5rem;
+      margin: 0.8rem 0 1rem;
+      font-size: 0.93rem;
+    }
+
+    .license {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 0.75rem;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Small screens: sidebar on top */
+    @media (max-width: 900px) {
+      body {
+        flex-direction: column;
+        overflow: auto;
+      }
+      .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: flex-start;
+      }
+      .sidebar-title {
+        width: 100%;
+      }
+      .sidebar-nav {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0.25rem 0.5rem 0.5rem;
+      }
+      .sidebar-link {
+        padding: 0.2rem 0.55rem;
+        margin-right: 0.25rem;
+      }
+      .sidebar-link.level-2,
+      .sidebar-link.level-3,
+      .sidebar-link.level-4 {
+        padding-left: 0.55rem;
+      }
+
+      main {
+        padding: 1.25rem 1.1rem 1.5rem;
+      }
+      h1 { font-size: 1.55rem; }
+      h2 { font-size: 1.22rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar / Navigation -->
+  <nav class="sidebar">
+    <div class="sidebar-title">Navigation</div>
+    <ul class="sidebar-nav" id="toc">
+      <!-- Filled dynamically by JavaScript -->
+    </ul>
+  </nav>
+
+  <!-- Main content -->
+  <div class="content-wrapper">
+    <main id="content">
+      <header>
+        <h1 id="openehr-aql-manager">AQL Manager</h1>
+        <p class="subtitle">
+          This webpage can be used to store and format openEHR compliant AQL queries.
+        </p>
+      </header>
+
+      <section>
+        <h2 id="disclaimer">Disclaimer</h2>
+        <div class="disclaimer-box">
+          <p><strong>AQL Manager</strong> (“the Software”) is provided as an open‑source project on an “AS IS” and “AS AVAILABLE” basis, without any warranties of any kind, express or implied.</p>
+          <p>To the maximum extent permitted by applicable law, the authors and contributors of the Software disclaim all warranties, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, non‑infringement, and any warranties arising out of course of dealing or usage of trade.</p>
+        
+        <p>The Software is intended for use by technically competent users. You are solely responsible for:</p>
+        <ul>
+          <li>Evaluating the accuracy, completeness, and suitability of the Software for your use case.</li>
+          <li>Validating all queries, configurations, and outputs before using them in production or on live data.</li>
+          <li>Maintaining appropriate backups, security controls, and access restrictions for any systems or data used with the Software.</li>
+        </ul>
+        <p>In no event shall the authors or contributors be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the Software or the use of, or other dealings in, the Software. This includes, without limitation, any loss or corruption of data, business interruption, security breach, or other indirect, incidental, special, exemplary, or consequential damages.</p>
+        <p>By using the Software, you agree that you do so at your own risk and that you will comply with all applicable laws, regulations, and internal policies governing your use of the Software and any associated data.</p>
+
+        </div>
+      </section>
+
+      <section>
+        <h2 id="precautions">Precautions</h2>
+        <div class="warning-box">
+          <p>Take into account: </p>
+          <ul>
+            <li>Reloading the HTML page might make you lose your progress. Please save often!</li>
+            <li>Be aware that changes to your AQL collection get saved in a new file every time you save. Be sure to keep the last downloaded file for your next session.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="gui-overview">GUI overview</h2>
+
+        <p><img src="pics/gui.png" alt="GUI"></p>
+
+        <p><strong>Elements of the User Interface</strong></p>
+        <ol>
+          <li>Input: AQL list is filtered by the input</li>
+          <li>Checkbox: Includes the description of the AQL in the filter</li>
+          <li>List of AQL currently in memory</li>
+          <li>Button: Add a new AQL to the list</li>
+          <li>Button: Delete the selected AQL</li>
+          <li>Button: Upload an AQL collection from a local JSON file</li>
+          <li>Button: Download the whole AQL collection</li>
+          <li>Button: Clear local storage</li>
+          <li>Button: Switch between dark and light mode for the formatted AQLs</li>
+          <li>Input: Title of the selected AQL</li>
+          <li>Input: Folder path. For example <span class="code-inline">"Examples/Test/final/"</span></li>
+          <li>Input: Description of the selected AQL</li>
+          <li>Button: Auto-format the AQL input field</li>
+          <li>Input: Editor for the AQL</li>
+          <li>Button: Download an image of the formatted AQL</li>
+          <li>Output: AQL with highlighted keywords</li>
+          <li>Button: Copy the cleaned up AQL to the clipboard</li>
+          <li>Output: Cleaned up AQL as an online text without tabs or comments</li>
+          <li>Input: If variables have been defined in the AQL editor, example values for the variable can be applied.</li>
+          <li>Button: Copy the AQL formatted as payload for EHRbase to the clipboard</li>
+          <li>Output: AQL formatted as payload for EHRbase</li>
+          <li>Link: Open user manual in a new browser tab.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2 id="user-guide">User Guide</h2>
+
+        <h3 id="starting-from-scratch">Starting from scratch</h3>
+
+        <h3 id="adding-an-aql">Adding an AQL</h3>
+        <p>Press the “Add AQL” button to add a new AQL to the list.</p>
+
+        <p><img src="pics/0002.png" alt="Add AQL button" width="200"></p>
+
+        <p>You get a new empty AQL in the main section.</p>
+
+        <p><img src="pics/0003.png" alt="New empty AQL" width="900"></p>
+
+        <p>New AQLs are in the “Unsorted” section of the AQL list. You can determine in which folder the AQL is located by changing the “Folder Path”. For example <span class="code-inline">"Examples/Manual/Test/Final"</span> will move the AQL to the location.</p>
+
+        <p><img src="pics/0003b.png" alt="Folder path" width="350"></p>
+
+        <p>Change the title, the description and finally add your AQL to the “AQL Input”.</p>
+
+        <p><img src="pics/0004.png" alt="AQL input" width="900"></p>
+
+        <h3 id="formatting-an-aql">Formatting an AQL</h3>
+
+        <h4 id="auto-formatting">Auto-Formatting</h4>
+        <p>For formatting your AQL, you can press the “auto-format” button.</p>
+
+        <p><img src="pics/0005.png" alt="Auto-format button" height="30"></p>
+
+        <p>This will create a fast first format, that adds line breaks and tabs before and after certain keywords.</p>
+
+        <p><img src="pics/0006.png" alt="Auto-formatted AQL" width="400"></p>
+
+        <h4 id="manual-formatting">Manual Formatting</h4>
+        <p>You can format your AQL input with line breaks, spaces and tabs.</p>
+
+        <p>You can use the auto-format button to enter automatically line breaks at the major keywords.</p>
+
+        <p>Use <span class="code-inline">//</span> to enter comments.</p>
+
+        <p>Use <span class="code-inline">$</span> to add variables (for example <span class="code-inline">$ehr_id</span>).</p>
+
+        <p>You can optionally add values for these parameters by adding comments in the format of
+          <span class="code-inline">// @param template_id = "my_awesome_template_v0"</span>.
+        </p>
+
+        <p><img src="pics/0007.png" alt="Manual formatting" height="150"></p>
+
+        <h4 id="formatted-aql">Formatted AQL</h4>
+        <p>The “Formatted AQL” section shows you a version of the input AQL with keyword highlights. The style can be changed between “dark” and “light” by pressing the style button.</p>
+
+        <p><img src="pics/0008.png" alt="Formatted AQL section" height="300"></p>
+
+        <p>The following text gets highlighted:</p>
+        <ul>
+          <li>Parameters starting with <span class="code-inline">$</span></li>
+          <li><span class="code-inline">['SELECT','FROM','CONTAINS','WHERE','ORDER BY','LIMIT','OFFSET']</span></li>
+          <li><span class="code-inline">['VERSION','EHR','CONTENT_ITEM','ENTRY','CARE_ENTRY','EVENT','ITEM_STRUCTURE','ITEM','COMPOSITION','FOLDER','EHR_STATUS','EVENT_CONTEXT','SECTION','GENERIC_ENTRY','ADMIN_ENTRY','OBSERVATION','INSTRUCTION','ACTION','EVALUATION','ACTIVITY','HISTORY','POINT_EVENT','INTERVAL_EVENT','ITEM_LIST','ITEM_SINGLE','ITEM_TABLE','ITEM_TREE','CLUSTER','ELEMENT']</span></li>
+          <li><span class="code-inline">['DESC','ASC','AS','DISTINCT','AND','OR','NOT','LIKE','matches','exists','&lt;','&gt;','=','!','true','false','NULL']</span></li>
+          <li>Inline comments that start with <span class="code-inline">//</span></li>
+        </ul>
+
+        <p>This view of the AQL can be exported as a PNG file. Press the snapshot button:</p>
+
+        <p><img src="pics/0015.png" alt="Snapshot button" height="30"></p>
+
+        <p>Automatically the image gets downloaded as <span class="code-inline">formatted_aql.png</span>.</p>
+
+        <h4 id="clean-aql">Clean AQL</h4>
+        <p>For many applications an AQL without line breaks, tabs or comments is needed. Therefore we present a cleaned up version in the “Clean AQL” section:</p>
+
+        <p><img src="pics/0013.png" alt="Clean AQL" width="800"></p>
+
+        <p>This AQL can be copied to the clipboard by pressing the “copy to clipboard” button:</p>
+
+        <p><img src="pics/0014.png" alt="Copy button" width="30"></p>
+
+        <h4 id="pre-formatted-payload-for-ehrbase">Pre-formatted payload for EHRbase</h4>
+        <p>For the use of the AQL for EHRbase via Postman, for example, the AQL has to be included in a JSON structure. For your convenience, this is done in the “Postman payload for EHRbase” section.</p>
+
+        <p><img src="pics/0018.png" alt="Postman payload" width="900"></p>
+
+        <p>If previously query parameters have been defined in the AQL (for example <span class="code-inline">$template_id</span>), a value for this query parameter can be added in the “Query parameters” section.</p>
+
+        <p>This AQL payload can be copied to the clipboard by pressing the “copy to clipboard” button:</p>
+
+        <p><img src="pics/0014.png" alt="Copy button" width="30"></p>
+
+        <h3 id="delete-an-aql">Delete an AQL</h3>
+        <p>To delete an AQL from the collection, select the AQL you want to delete in the list on the left hand side.</p>
+        <p>Press the “Delete AQL” button to delete the AQL:</p>
+
+        <p><img src="pics/0016.png" alt="Delete AQL button" width="200"></p>
+
+        <h3 id="changing-an-aql">Changing an AQL</h3>
+        <p>To modify an AQL, select the AQL you want to change in the list on the left hand side.</p>
+        <p>When an AQL is selected you can make changes to the title, description and input.</p>
+        <p>Don’t forget to save the selection after making changes.</p>
+
+        <h3 id="searching-for-an-aql">Searching for an AQL</h3>
+        <p>You can filter the list of AQL on the left hand side, by typing in the search bar above the list.
+          By default, only the AQL titles are filtered. You can select the “Include description in filter” checkbox to include also the AQL descriptions in the filter.
+        </p>
+
+        <p><img src="pics/filter.png" alt="Filter AQLs" height="60"></p>
+
+        <h3 id="starting-with-an-aql-collection">Starting with an AQL collection</h3>
+        <p>Instead of starting from scratch, you can load a JSON file with an AQL collection. Use the “Select file” button to do so:</p>
+
+        <p><img src="pics/0017.png" alt="Select file button" height="45"></p>
+
+        <p>Note that the format of the saved file has to be a list of elements that have 5 attributes: title, description, AQL, folder path and query parameter values:</p>
+
+        <p><img src="pics/0019.png" alt="File format" height="120"></p>
+
+        <h3 id="saving-the-aql-collection">Saving the AQL collection</h3>
+        <p>Use the “Download AQL collection” button to download the whole AQL collection:</p>
+
+        <p><img src="pics/0010.png" alt="Download collection button" width="200"></p>
+
+        <p>The whole AQL selection gets saved in an <span class="code-inline">aql_store_file.json</span> file. If this file already exists, a new file with “(N)” added to the name:</p>
+
+        <p><img src="pics/0011.png" alt="File naming" width="200"></p>
+
+        <p><strong>⚠️ The save button does not “update” a local file selected previously. Be sure to save the downloaded AQL collection for a future session.</strong></p>
+
+        <h3 id="deleting-the-local-browser-storage">Deleting the local browser storage</h3>
+        <p>The webpage uses the local storage of the web browser, so nothing gets lost when you close or reload the page.
+          If you want to delete the AQL data in local storage, you can do so with the “Clear Local Storage” button:
+        </p>
+
+        <p><img src="pics/0012.png" alt="Clear local storage button" height="30"></p>
+      </section>
+
+      <section class="license" id="license">
+        <h2>License</h2>
+        <p>© 2026 CatSalut. Servei Català de la Salut. Licensed under Apache 2.0. Author: Martin A. Koch, PhD.</p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Build a table of contents (left nav) from headings
+    (function () {
+      const content = document.getElementById('content');
+      const toc = document.getElementById('toc');
+      if (!content || !toc) return;
+
+      const headings = content.querySelectorAll('h1, h2, h3, h4');
+      const navItems = [];
+
+      headings.forEach(h => {
+        const level = parseInt(h.tagName.substring(1), 10);
+        if (level < 1 || level > 4) return;
+
+        // Ensure each heading has an id
+        if (!h.id) {
+          h.id = h.textContent.trim()
+            .toLowerCase()
+            .replace(/[^\w\- ]+/g, '')
+            .replace(/\s+/g, '-');
+        }
+
+        navItems.push({
+          id: h.id,
+          text: h.textContent.trim(),
+          level: level
+        });
+      });
+
+      navItems.forEach(item => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#' + item.id;
+        a.textContent = item.text;
+        a.className = 'sidebar-link level-' + item.level;
+        li.appendChild(a);
+        toc.appendChild(li);
+      });
+
+      // Scroll spy: highlight active section
+      const links = Array.from(toc.querySelectorAll('.sidebar-link'));
+      const headingMap = {};
+      headings.forEach(h => headingMap[h.id] = h);
+
+      function onScroll() {
+        let bestId = null;
+        let bestOffset = Number.POSITIVE_INFINITY;
+        const scrollY = window.scrollY || document.documentElement.scrollTop;
+
+        headings.forEach(h => {
+          const rect = h.getBoundingClientRect();
+          const offset = Math.abs(rect.top - 90); // 90px offset for header margin
+          if (rect.top <= 110 && offset < bestOffset) {
+            bestOffset = offset;
+            bestId = h.id;
+          }
+        });
+
+        links.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + bestId);
+        });
+      }
+
+      document.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+  </script>
+</body>
+</html>

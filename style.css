@@ -8,6 +8,7 @@ body {
     display: flex;
     height: 100vh;
     overflow: hidden;
+    margin: 0px;
 }
 
 h1{
@@ -175,17 +176,25 @@ textarea, .highlighted, .outputBox2, .outputPostman {
   	margin-bottom:10px;
   }
 
+  textarea{resize:vertical;}
+
   .highlighted {
     background-color: #f9f9f9;
     color: #333;
     min-height: 30px;
     border-radius: 0pt;
+
+    color:white;
+    background-color: black;
   }
 
   .outputBox2, .outputPostman {
     background-color: #f9f9f9;
     color: #333;
     min-height: 30px;
+
+    color:white;
+    background-color: black;
   }
 
   #descriptionBox{
@@ -203,19 +212,23 @@ textarea, .highlighted, .outputBox2, .outputPostman {
   }
 
   .keyword {
-    color: blue;
+    /*color: blue;*/
+    color: var(--panel-kw);
     font-weight: bold;
   }
   .datatype_keyword {
     color: red;
+    color: var(--panel-dtkw);
     font-weight: bold;
   }
   .green_keyword {
-    color: green;
+    /*color: limegreen;*/
+    color: var(--panel-gnkw);
     font-weight: bold;
   }
   .parameter_keyword {
-    color: orange;
+    /*color: orange;*/
+    color: var(--panel-pkw);
     font-weight: bold;
   }
 
@@ -224,8 +237,11 @@ textarea, .highlighted, .outputBox2, .outputPostman {
     font-style: italic;
   }
 
+
+
   button, .custom-file-upload {
-    padding: 10px 10px;
+    /*padding: 10px 10px;*/
+    padding: 5px;
     font-size: 14px;
     cursor: pointer;
     margin-right: 10px;
@@ -237,18 +253,53 @@ textarea, .highlighted, .outputBox2, .outputPostman {
     /*box-shadow: 1px 1px 3px gray;*/
   }
 
-  .topbutton,   #clear_storage{
+  /*
+  .custom-file-upload{
+    min-width: 220px;
+    border: 2px solid black;
+  }
+    */
+
+ .custom-file-upload {
+    width: 100px;
+    text-align-last: center;
+  }
+
+.topbutton,   #clear_storage{
     padding: 1pt;
     width: auto;
     align-self: right;
     font-size: 10pt;
-	height:25px;
-	width:25px;
+    height:25px;
+    width:25px;
   }
 
-  .custom-file-upload {
-    width: 210px;
-    text-align-last: center;
+.custom-file-upload{
+    border: 2px solid rgb(0, 0, 0);
+}
+
+ #clear_storage, #save_aql{
+    min-height: 30px;
+    min-width: 30px;
+  }
+
+  #clear_storage{
+    position: absolute;
+    right:10px;
+    top:10px;
+  }
+
+  #save_aql{
+    position: absolute;
+    right:170px;
+    top:10px;
+    width: 100px;
+  }
+
+  .custom-file-upload{
+    position: absolute;
+    top: 10px;
+    right: 50px;
   }
 
 #searchInput{
@@ -260,11 +311,7 @@ textarea, .highlighted, .outputBox2, .outputPostman {
   min-height: 20pt;
 }
 
-/*#checkBoxDescription{
-  margin-top: 5pt;
-  color: white;
-  font-size: 14px;
-}*/
+
 
 input[type="checkbox"] {
   cursor:pointer;
@@ -291,4 +338,92 @@ input[type="checkbox"] {
   border-radius: 5pt;
   padding: 5pt;
   border: 1px solid #ccc;
+}
+
+#folderPath {
+  width: 300px;
+  max-width: 500px;
+  border-radius: 5pt;
+  padding: 5pt;
+  border: 1px solid #ccc;
+}
+
+
+:root {
+  /* existing vars if you already have them… */
+
+  /* Panel theme (for formatted AQL / clean AQL / Postman) */
+  --panel-bg: #020617;                     /* default: dark */
+  --panel-fg: #e5e7eb;
+  --panel-border: rgba(148, 163, 184, 0.35);
+  --panel-kw: rgb(130, 130, 245);
+  --panel-gnkw: limegreen;
+  --panel-dtkw: hotpink;
+  --panel-pkw: orange;
+}
+
+/* Light variant for panels */
+body.panel-light {
+  --panel-bg: #ffffff;
+  --panel-fg: #0f172a;
+  --panel-border: #e5e7eb;
+  --panel-kw: darkblue;
+  --panel-gnkw: #bc00bc;
+  --panel-dtkw: red;
+  --panel-pkw: rgb(255, 136, 0);
+}
+
+.highlighted {
+  background-color: var(--panel-bg);
+  color: var(--panel-fg);
+  min-height: 30px;
+  border-radius: 5pt;         /* or keep 0pt if you prefer */
+  border: 1px solid var(--panel-border);
+}
+
+.outputBox2,
+.outputPostman {
+  background-color: var(--panel-bg);
+  color: var(--panel-fg);
+  min-height: 30px;
+  border-radius: 5pt;
+  border: 1px solid var(--panel-border);
+}
+
+
+#togglePanelTheme {
+  position: absolute;
+  bottom: 10px;
+  right: 30px;
+  margin-bottom: 8px;
+  width: 30px;
+  height: 30px;             
+  border-radius: 999px;
+  font-size: 25px;
+  padding-top: 0px;
+  padding-left: 3px;
+  /*border: 3px solid rgba(148, 163, 184, 0.7);
+  background-color: #f5f5f5;*/
+  background-color: whitesmoke;
+  border:2px solid gray;
+  cursor: pointer;
+}
+/*
+#togglePanelTheme:hover {
+  background-color: #e0f2fe;
+  border-color: #3b82f6;
+  box-shadow: 0 6px 12px rgba(15, 23, 42, 0.3);
+  transform: translateY(-1px);
+}
+*/
+
+#leftbar {
+  background: radial-gradient(circle at top left, #0b4a7f 0, #00375f 55%, #021529 100%);
+
+}
+
+
+summary{
+  color: darkblue;
+  cursor: pointer;
 }

@@ -1,3 +1,9 @@
+const version = '0.6.2';
+
+document.getElementById('version_info').innerHTML =
+  '<i>Version:&nbsp;</i> ' + version;
+
+
 //INITIATE CONSTANTS
 let selectedAQL = null;
 let aqlData = [];
@@ -8,8 +14,8 @@ const outputBox2 = document.getElementById('outputBox2');
 const highlightBox = document.getElementById('highlightBox');
 
 const keywords = ['SELECT',  'FROM', 'CONTAINS', 'WHERE', 'ORDER BY', 'LIMIT', 'OFFSET'];
-const datatype_keywords = ['VERSION','EHR', 'CONTENT_ITEM', 'ENTRY', 'CARE_ENTRY', 'EVENT', 'ITEM_STRUCTURE', 'ITEM', 'COMPOSITION', 'FOLDER', 'EHR_STATUS', 'EVENT_CONTEXT', 'SECTION', 'GENERIC_ENTRY', 'ADMIN_ENTRY', 'OBSERVATION', 'INSTRUCTION', 'ACTION', 'EVALUATION', 'ACTIVITY', 'HISTORY', 'POINT_EVENT', 'INTERVAL_EVENT', 'FEEDER_AUDIT', 'ITEM_LIST', 'ITEM_SINGLE', 'ITEM_TABLE', 'ITEM_TREE', 'CLUSTER', 'ELEMENT'];
-const green_keywords = ['DESC','ASC','AS','DISTINCT', 'AND', 'OR', 'NOT', 'LIKE', 'matches', 'exists', '<', '>', '=', '!', 'true', 'false', 'NULL']
+const datatype_keywords = ['VERSION','EHR', 'CONTENT_ITEM', 'ENTRY', 'CARE_ENTRY', 'EVENT', 'ITEM_STRUCTURE', 'ITEM', 'COMPOSITION', 'FOLDER', 'EHR_STATUS', 'EVENT_CONTEXT', 'SECTION', 'GENERIC_ENTRY', 'ADMIN_ENTRY', 'OBSERVATION', 'INSTRUCTION', 'ACTION', 'EVALUATION', 'ACTIVITY', 'HISTORY', 'POINT_EVENT', 'INTERVAL_EVENT', 'ITEM_LIST', 'ITEM_SINGLE', 'ITEM_TABLE', 'ITEM_TREE', 'CLUSTER', 'ELEMENT'];
+const green_keywords = ['DESC','ASC','AS','DISTINCT', 'AND', 'OR', 'NOT', 'LIKE', 'matches', 'exists', 'true', 'false', 'NULL']
 let fileurl;
 
 
@@ -28,6 +34,7 @@ window.onload = function () {
         // Normalize older entries
         aqlData.forEach(a => {
             if (!a.paramValues) a.paramValues = {};
+            if (!a.folderPath) a.folderPath = ""; 
         });
         
         populateAQLList();
@@ -141,8 +148,11 @@ const autoSaveToLocalStorage = debounce(() => {
         selectedAQL.title = document.getElementById('title').value;
         selectedAQL.description = document.getElementById('descriptionBox').value;
         selectedAQL.AQL = document.getElementById('inputBox').value;
+        //document.getElementById('folderPath').value = normalizeFolderPath(document.getElementById('folderPath').value);
+        selectedAQL.folderPath = document.getElementById('folderPath').value;
     }
     localStorage.setItem('aqlData', JSON.stringify(aqlData));
+    populateAQLList(document.getElementById('searchInput').value);
 }, 500);
 
 function toggleInputDisabled(state){
@@ -155,6 +165,7 @@ function toggleInputDisabled(state){
     document.getElementById('clipboardButton2').disabled = state;
     document.getElementById('snapshotButton').disabled = state;
     document.getElementById('formatButton').disabled = state;
+    document.getElementById('folderPath').disabled = state;
 }
 
 function loadAQL(aqlObject) {
@@ -162,13 +173,318 @@ function loadAQL(aqlObject) {
     document.getElementById('title').value = aqlObject.title;
     document.getElementById('descriptionBox').value = aqlObject.description;
     document.getElementById('inputBox').value = aqlObject.AQL;
+    document.getElementById('folderPath').value = aqlObject.folderPath || "";
     toggleInputDisabled(false);
     updateText();
 }
 
+function buildFolderTree(items) {
+  const root = { __items: [] };
 
+  for (const item of items) {
+    const raw = (item.folderPath || "").trim();
+    const parts = raw.split("/").map(s => s.trim()).filter(Boolean);
+
+    let node = root;
+    for (const p of parts) {
+      node[p] = node[p] || { __items: [] };
+      node = node[p];
+    }
+    node.__items.push(item);
+  }
+  return root;
+}
+
+function renderFolderNode(node, parentEl, currentPath = "", { autoOpenFolders = false } = {}) {
+  // Render subfolders first (sorted)
+
+  
+
+  const folderNames = Object.keys(node)
+    .filter(k => k !== "__items")
+    .sort((a, b) => a.localeCompare(b));
+  
+    for (const folderName of folderNames) {
+        //const folderPath = currentPath ? `${currentPath}/${folderName}` : folderName;
+        const details = document.createElement("details");
+
+        const folderPath = (currentPath ? currentPath : "") + folderName + "/";
+          details.dataset.path = folderPath;
+          details.open = autoOpenFolders || openFolderPaths.has(folderPath);
+
+
+        details.dataset.path = folderPath;
+        // Restore open/closed state:
+        details.open = autoOpenFolders || openFolderPaths.has(folderPath);
+        // Keep the set up-to-date when user opens/closes folders:
+        details.addEventListener("toggle", () => {
+          if (details.open) openFolderPaths.add(folderPath);
+          else openFolderPaths.delete(folderPath);
+          saveOpenFolders();
+        });
+        const summary = document.createElement("summary");
+        summary.textContent = folderName;
+        const ul = document.createElement("ul");
+        ul.style.marginLeft = "12px";
+        details.appendChild(summary);
+        details.appendChild(ul);
+        parentEl.appendChild(details);
+        renderFolderNode(node[folderName], ul, folderPath, { autoOpenFolders });
+      }
+      
+
+  // Render items in this folder (sorted)
+  const items = (node.__items || []).slice().sort((a, b) => a.title.localeCompare(b.title));
+  for (const item of items) {
+    const li = document.createElement("li");
+    li.textContent = item.title;
+
+    li.onclick = () => {
+      // Auto-save previous
+      if (selectedAQL) {
+        selectedAQL.title = document.getElementById('title').value;
+        selectedAQL.description = document.getElementById('descriptionBox').value;
+        selectedAQL.AQL = document.getElementById('inputBox').value;
+        selectedAQL.folderPath = document.getElementById('folderPath').value; // NEW
+      }
+
+      loadAQL(item);
+
+      if (selectedListItem) selectedListItem.classList.remove("selected");
+      li.classList.add("selected");
+      selectedListItem = li;
+    };
+
+    // Reapply selected class
+    if (selectedAQL && item === selectedAQL) {
+      li.classList.add("selected");
+      selectedListItem = li;
+    }
+
+    parentEl.appendChild(li);
+  }
+}
 
 function populateAQLList(filterText = '') {
+  const list = document.getElementById('aql_list');
+
+  // --- Preserve UI state before re-render ---
+  const prevScrollTop = list.scrollTop;
+
+  // Capture currently open folders
+  openFolderPaths.clear();
+  list.querySelectorAll('details[open]').forEach(d => {
+    const p = d.dataset.path;
+    if (p) openFolderPaths.add(p);
+  });
+
+
+  // --- Force-open the selected AQL's folder path (and all ancestors) ---
+  const addAncestorsToOpenFolders = (folderPath) => {
+    const norm = normalizeFolderPath(folderPath || ""); // ensures trailing "/"
+    if (!norm) return;
+
+    const parts = norm.split('/').filter(Boolean); // handles trailing "/"
+    let acc = "";
+    for (const part of parts) {
+      acc += part + "/";
+      openFolderPaths.add(acc);
+    }
+  };
+  
+
+  if (selectedAQL) {
+    const fp = selectedAQL.folderPath || "";
+    if (fp.trim() === "") {
+      // Selected is unsorted -> ensure Unsorted group opens (if you use it)
+      openFolderPaths.add('__unsorted__');
+    } else {
+      addAncestorsToOpenFolders(fp);
+    }
+  }
+    
+
+  saveOpenFolders();
+
+  // --- Clear and rebuild ---
+  list.innerHTML = '';
+
+  const includeDescription = document.getElementById('includeDescription').checked;
+  const lowerFilter = (filterText || '').toLowerCase().trim();
+
+  const filtered = aqlData.filter(item => {
+    const title = (item.title || '').toLowerCase();
+    const desc = (item.description || '').toLowerCase();
+    const folder = (item.folderPath || '').toLowerCase();
+
+    if (lowerFilter === '') return true;
+
+    const titleMatch = title.includes(lowerFilter);
+    const descMatch = includeDescription && desc.includes(lowerFilter);
+    const folderMatch = folder.includes(lowerFilter);
+
+    return titleMatch || descMatch || folderMatch;
+  });
+
+  const autoOpenFolders = lowerFilter.length > 0;
+  const tree = buildFolderTree(filtered);
+
+  // --- Render "Unsorted" bucket (optional) ---
+  const unsortedItems = (tree.__items || []);
+  if (unsortedItems.length > 0) {
+    const UNSORTED_KEY = '__unsorted__';
+
+    const details = document.createElement('details');
+    details.dataset.path = UNSORTED_KEY;
+    details.open = autoOpenFolders || openFolderPaths.has(UNSORTED_KEY);
+
+    details.addEventListener('toggle', () => {
+      if (details.open) openFolderPaths.add(UNSORTED_KEY);
+      else openFolderPaths.delete(UNSORTED_KEY);
+      saveOpenFolders();
+    });
+
+    const summary = document.createElement('summary');
+    summary.textContent = 'Unsorted';
+
+    const ul = document.createElement('ul');
+    ul.style.marginLeft = '12px';
+
+    details.appendChild(summary);
+    details.appendChild(ul);
+    list.appendChild(details);
+
+    renderFolderNode({ __items: unsortedItems }, ul, '', { autoOpenFolders });
+  }
+
+  // --- Render real folders (excluding root __items) ---
+  renderFolderNode({ ...tree, __items: [] }, list, '', { autoOpenFolders });
+
+  // Restore scroll position
+  list.scrollTop = prevScrollTop;
+}
+
+function populateAQLList_OLD3(filterText = '') {
+  const list = document.getElementById('aql_list');
+
+  // --- Preserve UI state before re-render ---
+  const prevScrollTop = list.scrollTop;
+
+  // Capture currently open folders (so we can restore after re-render)
+  openFolderPaths.clear();
+  list.querySelectorAll('details[open]').forEach(d => {
+    const p = d.dataset.path;
+    if (p) openFolderPaths.add(p);
+  });
+  saveOpenFolders();
+
+  // --- Clear and rebuild ---
+  list.innerHTML = '';
+
+  const includeDescription = document.getElementById('includeDescription').checked;
+  const lowerFilter = (filterText || '').toLowerCase().trim();
+
+  const filtered = aqlData.filter(item => {
+    const title = (item.title || '').toLowerCase();
+    const desc = (item.description || '').toLowerCase();
+    const folder = (item.folderPath || '').toLowerCase();
+
+    const titleMatch = title.includes(lowerFilter);
+    const descMatch = includeDescription && desc.includes(lowerFilter);
+    const folderMatch = folder.includes(lowerFilter); // optional but usually helpful
+
+    return lowerFilter === '' ? true : (titleMatch || descMatch || folderMatch);
+  });
+
+  const autoOpenFolders = lowerFilter.length > 0;
+
+  const tree = buildFolderTree(filtered);
+
+  // --- Render "Unsorted" (items with empty folderPath) ---
+  const unsortedItems = (tree.__items || []);
+  if (unsortedItems.length > 0) {
+    const UNSORTED_KEY = '__unsorted__';
+
+    const details = document.createElement('details');
+    details.dataset.path = UNSORTED_KEY;
+    details.open = autoOpenFolders || openFolderPaths.has(UNSORTED_KEY);
+
+    details.addEventListener('toggle', () => {
+      if (details.open) openFolderPaths.add(UNSORTED_KEY);
+      else openFolderPaths.delete(UNSORTED_KEY);
+      saveOpenFolders();
+    });
+
+    const summary = document.createElement('summary');
+    summary.textContent = 'Unsorted';
+
+    const ul = document.createElement('ul');
+    ul.style.marginLeft = '12px';
+
+    details.appendChild(summary);
+    details.appendChild(ul);
+    list.appendChild(details);
+
+    // Render only the unsorted items into this UL
+    renderFolderNode({ __items: unsortedItems }, ul, '', { autoOpenFolders });
+  }
+
+  // --- Render actual folder tree (excluding root __items) ---
+  renderFolderNode({ ...tree, __items: [] }, list, '', { autoOpenFolders });
+
+  // Restore scroll position (optional but nice)
+  list.scrollTop = prevScrollTop;
+}
+
+function populateAQLList_OLD2(filterText = '') {
+  const list = document.getElementById('aql_list');
+
+  const prevScrollTop = list.scrollTop;   // optional: keep scroll
+  captureOpenFolders();   
+
+  list.innerHTML = '';
+
+  const includeDescription = document.getElementById('includeDescription').checked;
+  const lowerFilter = filterText.toLowerCase();
+
+  const filtered = aqlData.filter(item => {
+    const titleMatch = (item.title || "").toLowerCase().includes(lowerFilter);
+    const descMatch = includeDescription && (item.description || "").toLowerCase().includes(lowerFilter);
+    const folderMatch = (item.folderPath || "").toLowerCase().includes(lowerFilter); // optional but useful
+    return titleMatch || descMatch || folderMatch;
+  });
+
+  const tree = buildFolderTree(filtered);
+
+  // If searching, it’s usually nicer to auto-open folders
+  const autoOpenFolders = lowerFilter.length > 0;
+
+  // Optionally group items with no folder under an "Unsorted" folder:
+  if ((tree.__items || []).length > 0) {
+    const unsortedDetails = document.createElement("details");
+    if (autoOpenFolders) unsortedDetails.open = true;
+
+    const summary = document.createElement("summary");
+    summary.textContent = "Unsorted";
+
+    const ul = document.createElement("ul");
+    ul.style.marginLeft = "12px";
+
+    unsortedDetails.appendChild(summary);
+    unsortedDetails.appendChild(ul);
+    list.appendChild(unsortedDetails);
+
+    renderFolderNode({ __items: tree.__items }, ul, { autoOpenFolders });
+  }
+
+  // Render real folders
+  renderFolderNode({ ...tree, __items: [] }, list, { autoOpenFolders });
+
+  list.scrollTop = prevScrollTop;   
+}
+
+
+function populateAQLList_OLD(filterText = '') {
     const list = document.getElementById('aql_list');
     list.innerHTML = '';
 
@@ -302,6 +618,8 @@ function handleTab(event) {
     // Escape HTML
     let highlightedText = rawText.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+
+
     // Highlight main keywords
     keywords.forEach(kw => {
       const regex = new RegExp(`\\b(${kw})\\b`, 'gi');
@@ -341,6 +659,8 @@ function handleTab(event) {
       const cleanedComment = comment.replace(/<\/?span[^>]*>/gi, '');
       return `<span class="comment">${cleanedComment}</span>`;
     });
+
+
     
     // Replace tabs and line breaks for proper display
     highlightedText = highlightedText
@@ -470,7 +790,9 @@ document.getElementById('add_aql').onclick = function () {
     const newEntry = {
         title: title,
         description: "",
-        AQL: ""
+        AQL: "",
+        folderPath: "",
+        paramValues: {}
     };
 
     aqlData.push(newEntry);
@@ -511,6 +833,13 @@ document.getElementById('delete_aql').onclick = function () {
 document.getElementById('delete_aql').onclick = function () {
     if (!selectedAQL) return;
 
+    const message = `Do you really want to delete ${selectedAQL.title}?`;
+
+    const confirmed = confirm(message);
+    if (!confirmed) {
+        event.preventDefault(); // Prevents the deletion if user cancels
+        return;
+    }
     // Remove the selected AQL from the array
     aqlData = aqlData.filter(item => item !== selectedAQL);
 
@@ -565,9 +894,87 @@ document.getElementById('includeDescription').addEventListener('change', functio
     populateAQLList(searchValue);
 });
 
+document.getElementById('folderPath').addEventListener('change', function(){
+  populateAQLList(document.getElementById('searchInput').value);
+})
+
+let openFolderPaths = new Set(JSON.parse(localStorage.getItem("aqlOpenFolders") || "[]"));
+
+function saveOpenFolders() {
+  localStorage.setItem("aqlOpenFolders", JSON.stringify([...openFolderPaths]));
+}
+
+function captureOpenFolders() {
+  openFolderPaths.clear();
+  document.querySelectorAll('#aql_list details[open]').forEach(d => {
+    const p = d.dataset.path;
+    if (p) openFolderPaths.add(p);
+  });
+  saveOpenFolders();
+}
+
+function normalizeFolderPath(path) {
+  if (!path) return "";
+  path = path.trim();
+
+  // Remove duplicate slashes
+  path = path.replace(/\/+/g, "/");
+
+  // Ensure trailing slash (but not leading, unless you want it)
+  if (!path.endsWith("/")) path += "/";
+
+  return path;
+}
 
 
+let darkTheme = 'dark';
 
+document.getElementById("togglePanelTheme").addEventListener('click', () => {
+  const btn = document.getElementById("togglePanelTheme");
+  console.log('click!')
+  function setPanelTheme(mode) {
+    darkTheme = mode;
+    // mode = 'light' or 'dark'
+    const isLight = mode === "light";
+    document.body.classList.toggle("panel-light", isLight);
+    //btn.textContent = `${isLight ? "⚪" : "⚫"}`;
+    localStorage.setItem("panelTheme", isLight ? "light" : "dark");
+  }
+  if (darkTheme=='dark'){
+    setPanelTheme('light');
+  }
+  else{
+    setPanelTheme('dark');  
+  }
 
+})
 
+/*
+(function () {
+  const btn = document.getElementById("togglePanelTheme");
+  if (!btn) return;
+  console.log('button pushed')
+  function setPanelTheme(mode) {
+    // mode = 'light' or 'dark'
+    const isLight = mode === "light";
+    document.body.classList.toggle("panel-light", isLight);
+    btn.textContent = `Panels: ${isLight ? "Light" : "Dark"}`;
+    localStorage.setItem("panelTheme", isLight ? "light" : "dark");
+  }
 
+  // Initialize from storage or default to dark
+  const stored = localStorage.getItem("panelTheme");
+  if (stored === "light" || stored === "dark") {
+    setPanelTheme(stored);
+  } else {
+    setPanelTheme("dark");
+  }
+
+  // Toggle on click
+  btn.addEventListener("click", () => {
+    const current = localStorage.getItem("panelTheme") === "light" ? "light" : "dark";
+    const next = current === "light" ? "dark" : "light";
+    setPanelTheme(next);
+  });
+})();
+*/

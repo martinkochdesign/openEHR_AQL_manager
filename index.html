@@ -11,14 +11,15 @@
 
     <div id="leftbar">
         <h1>AQL Manager</h1>
-        <p id="version"><button id="clear_storage" title="Clear Local Storage">🗑️</button>Version 0.4.1</p>   
-        <label for="aqlstore" class="custom-file-upload">
-            📤 Upload from JSON
-        </label>
-        <input type="file" id="aqlstore" name="aqlstore" accept=".json" />
+        <div id="version">
 
-        <input type="text" id="searchInput" placeholder="Filter AQL list..." />
-        <label id="checkBoxDescription"><input type="checkbox" id="includeDescription" /> Include description in filter</label>
+            <span id="version_info"></span> <span>    <a href="AQL_manager_user_manual.html" target="_blank" title="Open User Manual">📖</a></span>
+            </div>
+
+    <input type="text" id="searchInput" placeholder="Filter AQL list..." autocomplete="off"/>
+    <label id="checkBoxDescription">
+        <input type="checkbox" id="includeDescription" /> Include description in filter
+    </label>
 
         <div id="listcontainer">
             <ul id="aql_list">
@@ -26,7 +27,7 @@
         </div>
         <div id="leftbuttonmenu">
             <button id ="add_aql">➕ Add AQL</button><br>
-            <button id="save_aql">💾 Download AQL collection</button><br>
+
             <button id="delete_aql" >❌ Delete AQL</button>
         </div>
     </div>
@@ -35,11 +36,26 @@
     
     <div id="main">
 
+        <button id="clear_storage" title="Clear Local Storage">🗑️</button>
+        <button id="save_aql" title="Download AQL collection">💾 Download</button>
+
+        <label for="aqlstore" class="custom-file-upload" id="uploadLabel" title="Load AQL collection">
+        📤 Upload
+        </label>
+        <input type="file" id="aqlstore" name="aqlstore" accept=".json" />
+
+
+        <button id="togglePanelTheme" type="button">◐</button>
         <div>
             <label><strong>Title:</strong></label><br>
             <input type="text" id="title" name="title" required maxlength="128"
-                size="10" onfocusout="refreshAqlList(false);"/>          
+                size="10" autocomplete="off" onfocusout="refreshAqlList(false);"/>          
         </div>
+        <div>
+            <label><strong>Folder Path:</strong></label>
+            <input id="folderPath" placeholder="e.g. Clinical/Vitals" autocomplete="off"/>        
+        </div>
+        
         <div>
             <label><strong>Description:</strong></label>
             <textarea id="descriptionBox" oninput="" onkeydown="handleTab(event)" placeholder="Type your description here..."></textarea>
@@ -62,14 +78,14 @@
             <div id="paramEditor"></div>
 
             <div>
-            <label><strong>Postman payload:</strong></label>  <button id='clipboardButton2' class="topbutton" onclick="copyPostmanOutput()" title="Copy to clipboard">📋</button>
+            <label><strong>Postman payload for EHRbase:</strong></label>  <button id='clipboardButton2' class="topbutton" onclick="copyPostmanOutput()" title="Copy to clipboard">📋</button>
             <div id="outputPostman" class="outputPostman"></div>
         </div>
 
         <span class="copyright">
             <br>       
             <br>       
-            &copy 2025 CatSalut. Servei Català de la Salut.
+            &copy 2025-26 CatSalut. Servei Català de la Salut.
             Licensed under <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache 2.0</a>.
            Author: <a href="mailto:martinandreaskoch@catsalut.cat" target="_blank">Martin A. Koch, PhD</a>.
             </span>
