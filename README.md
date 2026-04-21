@@ -35,21 +35,23 @@ Take into account:
 5. Button: Delete the selected AQL
 6. Button: Upload an AQL collection from a local JSON file
 7. Button: Download the whole AQL collection
-8. Button: Clear local storage
-9. Button: Switch between dark and light mode for the formatted AQLs 
-10. Input: Title of the selected AQL
-11. Input: Folder path. For example "Examples/Test/final/"
-12. Input: Description of the selected AQL
-13. Button: Auto-format the AQL input field
-14. Input: Editor for the AQL
-15. Button: Download an image of the formatted AQL
-16. Output: AQL with highlighted keywords
-17. Button: Copy the cleaned up AQL to the clipboard
-18. Output: Cleaned up AQL as a online text without tabs or comments
-19. Input: If variables have been defined in the AQL editor, example values for the variable can be applied.
-20. Button: Copy the AQL formatted as payload for EHRbase to the clipboard
-21. Output: AQL formatted as payload for EHRbase
-22. Link: Open user manual in a new browser tab.
+8. Button: Create a text summary of the current AQL
+9. Button: Clear local storage
+10. Button: Switch between dark and light mode for the formatted AQLs 
+11. Input: Title of the selected AQL
+12. Input: Folder path. For example "Examples/Test/final/"
+13. Input: Description of the selected AQL
+14. Input: Input: If variables have been defined in the AQL editor, descriptions for the variable can be added.
+15. Button: Auto-format the AQL input field
+16. Input: Editor for the AQL
+17. Button: Download an image of the formatted AQL
+18. Output: AQL with highlighted keywords
+19. Button: Copy the cleaned up AQL to the clipboard
+20. Output: Cleaned up AQL as a online text without tabs or comments
+21. Input: If variables have been defined in the AQL editor, example values for the variable can be applied.
+22. Button: Copy the AQL formatted as payload for EHRbase to the clipboard
+23. Output: AQL formatted as payload for EHRbase
+24. Link: Open user manual in a new browser tab.
 
 
 ## User Guide

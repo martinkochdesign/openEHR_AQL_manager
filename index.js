@@ -1,4 +1,4 @@
-const version = '0.6.2';
+const version = '0.7.1';
 
 document.getElementById('version_info').innerHTML =
   '<i>Version:&nbsp;</i> ' + version;
@@ -34,6 +34,7 @@ window.onload = function () {
         // Normalize older entries
         aqlData.forEach(a => {
             if (!a.paramValues) a.paramValues = {};
+            if (!a.paramDescriptions) a.paramDescriptions = {};
             if (!a.folderPath) a.folderPath = ""; 
         });
         
@@ -53,6 +54,52 @@ function getDetectedParamsFromHighlight() {
     .filter(Boolean);
 }
 
+function renderParamDescriptors() {
+  const editor = document.getElementById('paramDescriptors');
+  if (!editor) return;
+
+  if (!selectedAQL) {
+    editor.innerHTML = '';
+    return;
+  }
+
+  const params = getDetectedParamsFromHighlight();
+  selectedAQL.paramDescriptions = selectedAQL.paramDescriptions || {};
+  
+
+  if (params.length === 0) {
+    editor.innerHTML = ''; 
+    return;
+  }
+
+  const rows = params.map(name => {
+    const val = selectedAQL.paramDescriptions[name] ?? '';
+    return `
+      <div style="display:flex; gap:8px; margin:6px 0; align-items:center;">
+        <label style="min-width:120px;">$${name}</label>
+        <input class="query_parameter_input" description-param="${name}" value="${String(val).replace(/"/g, '&quot;')}"
+               style="flex:1;" placeholder="add description here..." />
+      </div>
+    `;
+  }).join('');
+
+  editor.innerHTML = `<div><b>Query parameter descriptions:</b></div>${rows}`;
+
+  editor.querySelectorAll('input[description-param]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const key = inp.getAttribute('description-param');
+      selectedAQL.paramDescriptions[key] = inp.value;
+
+      // Persist using your existing mechanism
+      autoSaveToLocalStorage();
+
+      // Update payload instantly
+      preparePostmanPayload();
+    });
+  });
+}
+
+
 function renderParamEditor() {
   const editor = document.getElementById('paramEditor');
   if (!editor) return;
@@ -63,7 +110,7 @@ function renderParamEditor() {
   }
 
   const params = getDetectedParamsFromHighlight();
-  selectedAQL.paramValues = selectedAQL.paramValues || {};
+  selectedAQL.paramValues = selectedAQL.paramValues || {}; 
 
   if (params.length === 0) {
     //editor.innerHTML = '<div><b>Query parameters:</b> none detected</div>';
@@ -82,7 +129,7 @@ function renderParamEditor() {
     `;
   }).join('');
 
-  editor.innerHTML = `<div><b>Query parameters:</b></div>${rows}`;
+  editor.innerHTML = `<div><b>Query parameter values:</b></div>${rows}`;
 
   editor.querySelectorAll('input[data-param]').forEach(inp => {
     inp.addEventListener('input', () => {
@@ -150,6 +197,7 @@ const autoSaveToLocalStorage = debounce(() => {
         selectedAQL.AQL = document.getElementById('inputBox').value;
         //document.getElementById('folderPath').value = normalizeFolderPath(document.getElementById('folderPath').value);
         selectedAQL.folderPath = document.getElementById('folderPath').value;
+
     }
     localStorage.setItem('aqlData', JSON.stringify(aqlData));
     populateAQLList(document.getElementById('searchInput').value);
@@ -604,6 +652,9 @@ function handleTab(event) {
         if (selectedAQL.paramValues[k] === undefined || selectedAQL.paramValues[k] === "") {
         selectedAQL.paramValues[k] = v;
         }
+        if (selectedAQL.paramDescriptions[k] === undefined || selectedAQL.paramDescriptions[k] === "") {
+        selectedAQL.paramDescriptions[k] = v;
+        }
     });
     }
 
@@ -670,6 +721,7 @@ function handleTab(event) {
     highlightBox.innerHTML = highlightedText;
 
     renderParamEditor();
+    renderParamDescriptors();
 
     preparePostmanPayload();
   }
@@ -774,6 +826,77 @@ document.getElementById('save_aql').onclick = function () {
     populateAQLList(document.getElementById('searchInput').value);
 };
 
+/*
+document.getElementById('aql_summary_btn').onclick = function () {
+if(selectedAQL){
+  selectedAQL.title
+  selectedAQL.description
+  selectedAQL.paramDescriptions
+  document.getElementById('outputBox2').innerText
+}
+};
+*/
+
+document.getElementById('aql_summary_btn').onclick = function () {
+  if (!selectedAQL) return;
+
+  const title = selectedAQL.title ?? '';
+  const description = selectedAQL.description ?? '';
+  const paramDescriptions = selectedAQL.paramDescriptions ?? {};
+  const divText = document.getElementById('outputBox2')?.innerText ?? '';
+
+  // Build a text table for paramDescriptions (assumes it's an object: { key: value, ... })
+  const entries = Object.entries(paramDescriptions);
+
+  const keyHeader = 'Parameter';
+  const valHeader = 'Description';
+
+  const keyWidth = Math.max(
+    keyHeader.length,
+    ...entries.map(([k]) => String(k).length),
+    3
+  );
+
+  const lines = [];
+  lines.push(`${keyHeader.padEnd(keyWidth)} | ${valHeader}`);
+  lines.push(`${'-'.repeat(keyWidth)}-|-${'-'.repeat(Math.max(valHeader.length, 5))}`);
+
+  for (const [k, v] of entries) {
+    const valueText =
+      typeof v === 'string' ? v : JSON.stringify(v, null, 0);
+    lines.push(`${String(k).padEnd(keyWidth)} | ${valueText}`);
+  }
+
+  const paramTableText = entries.length ? lines.join('\n') : '(none)';
+
+  // Compose final document text
+  const docText =
+`Title
+${title}
+
+Description
+${description}
+
+Parameter Descriptions
+${paramTableText}
+
+AQL String
+${divText}
+`;
+
+  // Open in a new tab as a "text file"
+  const blob = new Blob([docText], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  // Note: may be blocked by popup blockers unless triggered by a direct click.
+  window.open(url, '_blank', 'noopener,noreferrer');
+
+  // Optional cleanup (delay so the new tab has time to load the blob URL)
+  setTimeout(() => URL.revokeObjectURL(url), 30_000);
+};
+
+
+
 document.getElementById('add_aql').onclick = function () {
     
     //document.getElementById('searchInput').value='';
@@ -792,7 +915,8 @@ document.getElementById('add_aql').onclick = function () {
         description: "",
         AQL: "",
         folderPath: "",
-        paramValues: {}
+        paramValues: {},
+        paramDescriptions: {}
     };
 
     aqlData.push(newEntry);

@@ -36,11 +36,12 @@
     
     <div id="main">
 
+        <button id="aql_summary_btn" title="Get a summary of the AQL">📃 Summary</button>
         <button id="clear_storage" title="Clear Local Storage">🗑️</button>
         <button id="save_aql" title="Download AQL collection">💾 Download</button>
 
         <label for="aqlstore" class="custom-file-upload" id="uploadLabel" title="Load AQL collection">
-        📤 Upload
+        📤 Load
         </label>
         <input type="file" id="aqlstore" name="aqlstore" accept=".json" />
 
@@ -60,6 +61,9 @@
             <label><strong>Description:</strong></label>
             <textarea id="descriptionBox" oninput="" onkeydown="handleTab(event)" placeholder="Type your description here..."></textarea>
         </div>
+
+        <div id="paramDescriptors"></div>
+
         <div>
             <label><strong>AQL Input:</strong>  </label><button id="formatButton" class="topbutton" onclick="autoFormat()" title="Auto-Format">🤖</button>
             <textarea id="inputBox" oninput="updateText()" onkeydown="handleTab(event)" placeholder="Type your AQL query here..."></textarea>
